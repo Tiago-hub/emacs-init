@@ -18,13 +18,35 @@
 
 (load "~/.emacs.d/org-bullets")
 
+;; tabs and spaces
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+(setq indent-line-function 'insert-tab)
+
+;;backups
+(defvar --backup-directory (concat user-emacs-directory "backups"))
+(if (not (file-exists-p --backup-directory))
+        (make-directory --backup-directory t))
+(setq backup-directory-alist `(("." . ,--backup-directory)))
+(setq make-backup-files t               ; backup of a file the first time it is saved.
+      backup-by-copying t               ; don't clobber symlinks
+      version-control t                 ; version numbers for backup files
+      delete-old-versions t             ; delete excess backup files silently
+      delete-by-moving-to-trash t
+      kept-old-versions 2               ; oldest versions to keep when a new numbered backup is made (default: 2)
+      kept-new-versions 2               ; newest versions to keep when a new numbered backup is made (default: 2)
+      auto-save-default t               ; auto-save every buffer that visits a file
+      auto-save-timeout 30              ; number of seconds idle time before auto-save (default: 30)
+      auto-save-interval 300            ; number of keystrokes between auto-saves (default: 300)
+      )
+
 ;;org mode hide emphasis
 (setq org-hide-emphasis-markers t)
 
 ;;more org mode configs
 (font-lock-add-keywords 'org-mode
-                        '(("^ +\\([-*]\\) "
-                            (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+			'(("^ +\\([-*]\\) "
+			    (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
 (require 'org-bullets)
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
@@ -84,7 +106,7 @@
 
 (use-package evil
   :ensure t
-  :init
+  :init 
   (setq evil-want-C-i-jump nil)
   (evil-mode 1))
 
@@ -94,3 +116,16 @@
 
 (require 'org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(org-bullets all-the-icons neotree auto-complete which-key try use-package)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

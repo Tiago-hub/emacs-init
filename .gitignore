@@ -1,0 +1,12 @@
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!init.el
+!org-bullets.el
+!README.md
+# etc...
+
+# ...even if they are in subdirectories
+!*/
