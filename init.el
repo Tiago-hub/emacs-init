@@ -17,6 +17,7 @@
 (load-theme 'tango-dark)
 
 (load "~/.emacs.d/org-bullets")
+(load "~/.emacs.d/markdown-mode")
 
 ;; tabs and spaces
 (setq-default indent-tabs-mode nil)
@@ -42,6 +43,12 @@
 
 ;;org mode hide emphasis
 (setq org-hide-emphasis-markers t)
+(setq org-startup-with-inline-images t)
+
+;;emacs tabs
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+(setq indent-line-function 'insert-tab)
 
 ;;more org mode configs
 (font-lock-add-keywords 'org-mode
@@ -63,9 +70,35 @@
 
 (add-hook 'org-mode-hook '(lambda () (setq fill-column 80)))
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
+
+;;neotree keybindings with evil mode
+
+(add-hook 'neotree-mode-hook
+            (lambda ()
+            (define-key evil-normal-state-local-map (kbd "TAB") 'neotree-enter)
+            (define-key evil-normal-state-local-map (kbd "SPC") 'neotree-quick-look)
+            (define-key evil-normal-state-local-map (kbd "q") 'neotree-hide)
+            (define-key evil-normal-state-local-map (kbd "RET") 'neotree-enter)
+            (define-key evil-normal-state-local-map (kbd "g") 'neotree-refresh)
+            (define-key evil-normal-state-local-map (kbd "n") 'neotree-next-line)
+            (define-key evil-normal-state-local-map (kbd "p") 'neotree-previous-line)
+            (define-key evil-normal-state-local-map (kbd "A") 'neotree-stretch-toggle)
+            (define-key evil-normal-state-local-map (kbd "H") 'neotree-hidden-file-toggle)))
+
+;;load markdown
+(autoload 'markdown-mode "markdown-mode"
+   "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist
+             '("\\.\\(?:md\\|markdown\\|mkd\\|mdown\\|mkdn\\|mdwn\\)\\'" . markdown-mode))
+
+(autoload 'gfm-mode "markdown-mode"
+   "Major mode for editing GitHub Flavored Markdown files" t)
+(add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
 ;;packages
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives
+             '("melpa-stable" . "https://stable.melpa.org/packages/"))
 ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
 ;; and `package-pinned-packages`. Most users will not need or want to do this.
 ;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
