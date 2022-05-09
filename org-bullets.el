@@ -67,10 +67,6 @@ It can contain any number of symbols, which will be repeated."
          (org-cycle))))
   "Mouse events for bullets.
 Should this be undesirable, one can remove them with
-<<<<<<< HEAD
-=======
-
->>>>>>> 15b5701 (org-bullets)
 \(setcdr org-bullets-bullet-map nil\)")
 
 (defun org-bullets-level-char (level)

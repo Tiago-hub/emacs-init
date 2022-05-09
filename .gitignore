@@ -5,6 +5,7 @@
 !.gitignore
 !init.el
 !org-bullets.el
+!markdown-mode.el
 !README.md
 # etc...
 
