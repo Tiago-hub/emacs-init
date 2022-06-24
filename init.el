@@ -18,6 +18,7 @@
 
 (load "~/.emacs.d/org-bullets")
 (load "~/.emacs.d/markdown-mode")
+(load "~/.emacs.d/dimmer.el/dimmer")
 (load "~/.emacs.d/indent-guide/indent-guide")
 
 ;; tabs and spaces
@@ -157,14 +158,17 @@
 (use-package all-the-icons
   :if (display-graphic-p))
 
-(use-package page-break-lines)
-(use-package projectile)
+(use-package page-break-lines
+  :ensure t)
+(use-package projectile
+  :ensure t)
 (use-package dashboard
   :ensure t
   :config
   (dashboard-setup-startup-hook))
 
-(use-package pulsar)
+(use-package pulsar
+  :ensure t)
 
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
@@ -178,9 +182,11 @@
  (indent-guide-global-mode)
 
 (use-package rainbow-delimiters)
+ :ensure t
  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
 (use-package dumb-jump)
+ :ensure t
  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 
 ;; emacs server
