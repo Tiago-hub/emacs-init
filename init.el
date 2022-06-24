@@ -18,6 +18,7 @@
 
 (load "~/.emacs.d/org-bullets")
 (load "~/.emacs.d/markdown-mode")
+(load "~/.emacs.d/indent-guide/indent-guide")
 
 ;; tabs and spaces
 (setq-default indent-tabs-mode nil)
@@ -43,7 +44,6 @@
 
 ;;org mode hide emphasis
 (setq org-hide-emphasis-markers t)
-(setq org-startup-with-inline-images t)
 
 ;;emacs tabs
 (setq-default indent-tabs-mode nil)
@@ -71,19 +71,10 @@
 (add-hook 'org-mode-hook '(lambda () (setq fill-column 80)))
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
-;;neotree keybindings with evil mode
+;;python folding
+(add-hook 'python-mode-hook 'outline-minor-mode)
 
-(add-hook 'neotree-mode-hook
-            (lambda ()
-            (define-key evil-normal-state-local-map (kbd "TAB") 'neotree-enter)
-            (define-key evil-normal-state-local-map (kbd "SPC") 'neotree-quick-look)
-            (define-key evil-normal-state-local-map (kbd "q") 'neotree-hide)
-            (define-key evil-normal-state-local-map (kbd "RET") 'neotree-enter)
-            (define-key evil-normal-state-local-map (kbd "g") 'neotree-refresh)
-            (define-key evil-normal-state-local-map (kbd "n") 'neotree-next-line)
-            (define-key evil-normal-state-local-map (kbd "p") 'neotree-previous-line)
-            (define-key evil-normal-state-local-map (kbd "A") 'neotree-stretch-toggle)
-            (define-key evil-normal-state-local-map (kbd "H") 'neotree-hidden-file-toggle)))
+;;neotree keybindings with evil mode
 
 ;;load markdown
 (autoload 'markdown-mode "markdown-mode"
@@ -94,6 +85,7 @@
 (autoload 'gfm-mode "markdown-mode"
    "Major mode for editing GitHub Flavored Markdown files" t)
 (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
+
 ;;packages
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -133,6 +125,19 @@
     (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
   :bind (("C-\\" . 'neotree-toggle))) ;;vscode shortcut
 
+(add-hook 'neotree-mode-hook
+            (lambda ()
+            (define-key evil-normal-state-local-map (kbd "TAB") 'neotree-enter)
+            (define-key evil-normal-state-local-map (kbd "SPC") 'neotree-quick-look)
+            (define-key evil-normal-state-local-map (kbd "q") 'neotree-hide)
+            (define-key evil-normal-state-local-map (kbd "RET") 'neotree-enter)
+            (define-key evil-normal-state-local-map (kbd "g") 'neotree-refresh)
+            (define-key evil-normal-state-local-map (kbd "n") 'neotree-next-line)
+            (define-key evil-normal-state-local-map (kbd "p") 'neotree-previous-line)
+            (define-key evil-normal-state-local-map (kbd "A") 'neotree-stretch-toggle)
+            (define-key evil-normal-state-local-map (kbd "H") 'neotree-hidden-file-toggle)))
+
+
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode t))
@@ -149,6 +154,40 @@
 
 (require 'org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(use-package all-the-icons
+  :if (display-graphic-p))
+
+(use-package page-break-lines)
+(use-package projectile)
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
+
+(use-package pulsar)
+
+(when (fboundp 'windmove-default-keybindings)
+  (windmove-default-keybindings))
+
+(require 'dimmer)
+ (dimmer-configure-which-key)
+ (dimmer-configure-helm)
+ (dimmer-mode t)
+
+(require 'indent-guide)
+ (indent-guide-global-mode)
+
+(use-package rainbow-delimiters)
+ (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+
+(use-package dumb-jump)
+ (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+
+;; emacs server
+(server-start)
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
