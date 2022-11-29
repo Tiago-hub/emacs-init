@@ -1,0 +1,36 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+
+from flask import Flask, request
+from flask_cors import CORS, cross_origin
+import subprocess as commands
+from datetime import datetime
+
+app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+@app.route('/', methods=['GET', 'POST'])
+@cross_origin()
+def index():
+    data = request.values
+    start = data.get('start-date')
+    end = data.get('end-date')
+    report = data.get('report-type')
+    print(start,end,report)
+    start = datetime.strptime(start, "%Y-%m-%dT%H:%M")
+    end = datetime.strptime(end, "%Y-%m-%dT%H:%M")
+    print(start,end)
+    # cmd2run = ["ssh", "mfg-smd12", "/et3mach/bin/xeDiags", "-run", "getstatus"]
+    # subproc = commands.run(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True)
+    # print(subproc.stdout)
+
+    return 'Server Works!'
+  
+@app.route('/greet')
+@cross_origin()
+def say_hello():
+  return 'Hello from Server'
+
+
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0', port = 8050)

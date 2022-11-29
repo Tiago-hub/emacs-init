@@ -1,0 +1,77 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3
+
+'''
+search_ue.py: Parse PDZ report log files searching for telemetry info around
+given time.
+Created on: Aug 17, 2022
+Author:     tiagof@cadence.com
+Python:     3.7
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+'''
+
+import os, sys, re
+from datetime import datetime
+import json
+import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
+import optparse
+p = optparse.OptionParser()
+p.add_option
+
+p.add_option("-l",
+             action="store",
+             dest="log_file",
+             )
+p.add_option("-d",
+            action = "store",
+            dest="log_date")
+
+p.add_option("-c",
+            action="store",
+            dest="chip")
+
+p.add_option("-f",
+            action="store",
+            dest="failure_time")
+
+opts, args = p.parse_args();  # if -h or --help, display help output and exit
+with open(f"/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_23Aug1144/log/{opts.log_date}/{opts.log_file}.log") as file:
+    content = file.readlines()
+    
+timestamps = []
+measures = []
+pattern = "(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*?"+opts.chip+" Temperature: (\d+\.\d+)"
+print(pattern)
+match_target = re.compile(pattern) 
+
+for line in content:
+    match = match_target.match(line)
+    if match:
+        time = datetime.strptime(match.group(1),"%Y/%m/%d %H:%M:%S")
+        #time = datetime.strftime(time, "%H:%M:%S")
+        timestamps.append(time)
+        measures.append(float(match.group(2)))
+# plot
+fig, ax = plt.subplots()
+ax.plot(timestamps, measures)
+plt.axvline(x = datetime.strptime(opts.failure_time,"%Y-%m-%d %H:%M:%S"), color = 'r', label = 'Time of lane failure')
+ax.xaxis.set_major_formatter(DateFormatter('%H:%M'))
+plt.title(f"Nvidia 8R {opts.log_file} {opts.chip} Temperature on {opts.log_date}")
+plt.xlabel("Time")
+plt.ylabel("Voltage [V]")
+plt.legend(loc="upper left")
+plt.show()

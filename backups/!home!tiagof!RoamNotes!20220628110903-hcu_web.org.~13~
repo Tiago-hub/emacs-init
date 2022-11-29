@@ -1,0 +1,46 @@
+:PROPERTIES:
+:ID:       6eff05a7-1094-41d6-b4c6-d4fc42d3bc84
+:END:
+#+title: hcu-web
+* Requisites:
+    - Nginx
+    - setup nginx config file
+    - python Flask
+    - python flask cors (pip install -U flask-cors)
+* Idea:
+    Serve static using nginx and use python Flask server which nginx can proxy to proccess server and scripts requests
+* Activities
+** DONE Get reports dynamically
+    DEADLINE: <2022-06-30>
+** DONE Run python scripts from wxe branch
+    DEADLINE: <2022-06-30>
+** DONE Add Telegraphs to dashboard
+    DEADLINE: <2022-06-30>
+** DONE Tell user report is being generated
+    DEADLINE: <2022-06-30>
+** DONE Tell user is finished the report generation
+    DEADLINE: <2022-06-30>
+** DONE Adapt the Telegraphs to go inside web dashboard
+    DEADLINE: <2022-07-12>
+*** DONE Trigger "Add measure" event when clicking the button
+        Observation: change the filter order: instead of measure -> device -> rcb ->
+        type NOW IS measure -> board type -> rcb -> device
+        - Available measures: check sql dir and list using filenames
+*** DONE Trigger events using each dropdown selection
+*** DONE Query data using filters
+*** DONE Plot data using plotly JS
+*** DONE Clean cookies on reload
+*** DONE Verify delete traces feature
+*** DONE Extend features to Pressure database
+*** DONE Verify the ET3activity special case.
+        Maybe add a button to get activity?
+*** DONE Fix nginx config file.
+        The nginx config file needs a few more statements to handle downloads
+        It should be like this [[id:d0bf0f31-1f67-422b-aaeb-43e422d68916][hcu-nginx.conf]]
+*** DONE set debug to false
+*** DONE Develop installation script
+        It would be great to have a auto install script for it
+        - [X] Setup nginx file
+        - [X] Check for file tree integrity (mostly dir public/files)
+          Not really needed since files come from perforce
+        - [X] Setup server on container

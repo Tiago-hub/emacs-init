@@ -1,0 +1,11 @@
+:PROPERTIES:
+:ID:       f6b0fca2-808d-42c8-8107-e48fa738b1e1
+:END:
+#+title: hcu-for-dummies
+* HCU (Health Check Utility)
+** Ingest telemetry data and register it in sql database
+*** Database data can be accessed in many ways:
+**** Command line
+**** Python library
+**** Dbeaver
+**** Telegraphs

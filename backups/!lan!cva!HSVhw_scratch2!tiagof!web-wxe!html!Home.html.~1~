@@ -1,0 +1,9 @@
+<h1 style="text-align: center">mfg-smd12</h1> <button> Change emulator </button>
+<select class="select2" interact-type="filter" name="measure" style="width:20%" data-placeholder="Select measure type">
+</select>
+<select class="select2" interact-type="filter" name="board-type" style="width:20%" multiple data-placeholder="Select board type">
+</select>
+<select class="select2" interact-type="filter" name="RCB" style="width:20%" multiple data-placeholder="Select RCB address">
+</select>
+<select class="select2" interact-type="filter" name="device" style="width:20%" multiple data-placeholder="Select device">
+</select>

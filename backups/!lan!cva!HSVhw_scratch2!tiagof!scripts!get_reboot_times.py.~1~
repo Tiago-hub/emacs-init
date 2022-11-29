@@ -1,0 +1,90 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3
+
+import re
+from datetime import datetime
+
+def check_power_times(self):
+    power_down_times = []
+    power_up_times = []
+    text_list = getattr(self,"xediags_output","").split("\n")
+    last_line = len(text_list)
+    for i in range(last_line):
+        #search for some power down:
+        expr = "\[([0-1]\d-[0-3]\d-\d+3?) " \
+                "([0-2][0-9]:[0-5][0-9]:[0-5][0-9])\]" \
+                "(\[POWER_OP_THREAD\])" \
+                "Powering Down (\w*) (\w*)"
+        m = re.search(expr,text_list[i])
+        if m:
+            date_down_begin=m.group(1)
+            time_down_begin=m.group(2)
+            date_time_down_begin = datetime.strptime(date_down_begin + \
+                                    " " + time_down_begin, \
+                                    "%m-%d-%Y %H:%M:%S")
+
+            board_down_type = m.group(4)
+            board_down_number = int(m.group(5))
+
+            for j in range(i, last_line):
+                #search for power down finish time
+                expr = "\[([0-1]\d-[0-3]\d-\d+3?) " \
+                        "([0-2][0-9]:[0-5][0-9]:[0-5][0-9])\]" \
+                        + board_down_type + " "+str(board_down_number) +" Node ID: f*"
+                m = re.search(expr,text_list[j])
+                if m:
+                    date_down_finish = m.group(1)
+                    time_down_finish = m.group(2)
+                    date_time_down_finish = datetime.strptime(date_down_finish + \
+                                            " "+ time_down_finish,\
+                                            "%m-%d-%Y %H:%M:%S")
+                    dict_board = {"board_type":board_down_type,\
+                                    "board_number":board_down_number,
+                                    "delta_time":str(date_time_down_finish -\
+                                        date_time_down_begin)}
+                    power_down_times.append(dict_board)
+                    break
+        else:
+            #search for some power up:
+            expr = "\[([0-1]\d-[0-3]\d-\d+3?) " \
+                    "([0-2][0-9]:[0-5][0-9]:[0-5][0-9])\]" \
+                    "(\[POWER_OP_THREAD\])" \
+                    "Powering Up (\w*) (\w*)"
+            m = re.search(expr,text_list[i])
+            if m:
+                date_up_begin=m.group(1)
+                time_up_begin=m.group(2)
+                date_time_up_begin = datetime.strptime(date_up_begin + \
+                                        " " + time_up_begin, \
+                                        "%m-%d-%Y %H:%M:%S")
+                #accounts 30 seconds the system awaits to power up boards
+                date_time_up_begin = date_time_up_begin - timedelta(seconds=30)
+                board_up_type = m.group(4)
+                board_up_number = int(m.group(5))
+
+                for j in range(i, last_line):
+                    #search for power-up done
+                    expr = "\[([0-1]\d-[0-3]\d-\d+3?) " \
+                            "([0-2][0-9]:[0-5][0-9]:[0-5][0-9])\]" \
+                            "Power-up done"
+
+                    m = re.search(expr,text_list[j])
+                    if m:
+                        date_up_finish = m.group(1)
+                        time_up_finish = m.group(2)
+                        date_time_up_finish = datetime.strptime(date_up_finish + \
+                                                " "+ time_up_finish,\
+                                                "%m-%d-%Y %H:%M:%S")
+                        dict_board = {"board_type":board_up_type,\
+                                        "board_number":board_up_number,
+                                        "delta_time":str(date_time_up_finish -\
+                                            date_time_up_begin)}
+                        power_up_times.append(dict_board)
+                        break
+    self.power_up_times = power_up_times
+    self.power_down_times = power_down_times
+    if power_down_times or power_up_times:
+        return True
+    else:
+        return False
+
+if __name__ == "__main__":

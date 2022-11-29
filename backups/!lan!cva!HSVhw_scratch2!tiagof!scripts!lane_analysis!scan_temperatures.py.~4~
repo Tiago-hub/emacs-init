@@ -1,0 +1,226 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : scan_temperatures.py
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+
+import os, sys, re
+from datetime import datetime
+import optparse
+import time
+start_time = time.time()
+
+#function which split the list into two halves
+def halve_list(inputlist):
+
+    length = len(inputlist)
+    n = length//2 
+    first_half=inputlist[:n]
+    sec_half=inputlist[n:]
+
+    return first_half,sec_half
+
+
+p = optparse.OptionParser()
+p.add_option
+
+p.add_option("-t",
+             action="store",
+             dest="lane_error_type",
+             )
+p.add_option("--log_root",
+            action = "store",
+            dest="log_root")
+
+p.add_option("--target",
+            action="store",
+            dest="target")
+
+p.add_option("--failing_lanes",
+            action="store",
+            dest="failing_lanes")
+
+p.set_defaults(lane_error_type="ce")
+p.set_defaults(log_root=None)
+p.set_defaults(target=None)
+p.set_defaults(failing_lanes="./files/nvidia_aug_2.txt")
+
+opts, args = p.parse_args();  # if -h or --help, display help output and exit
+
+
+log_roots = {
+    "jun": "/lan/cva/bldg11_eng/CustomerPDZ/Nvidia/mekong-3R/PDZ-Report_root_mekong-emu_30Jun1152/log",
+    "aug": "/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_13Aug1047/log",
+    "aug2": "/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_21Aug1416/log"
+}
+
+log_root = opts.log_root if opts.log_root is not None else log_roots["aug2"]
+target = opts.target
+json_name = f'data_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json'
+failing_lanes = opts.failing_lanes
+lane_error_type = opts.lane_error_type
+
+lanes_info = []
+with open(failing_lanes) as file:
+    
+    if lane_error_type == "ue":
+        pattern = ("(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*? lane "
+                   "(\d+,\d+,\d+,\d+,\d+,\d+,\d+)"
+                   "->"
+                   "(\d+,\d+,\d+,\d+,\d+,\d+,\d+) "
+                   "during LSM monitoring")
+    elif lane_error_type == "ce":
+        pattern = ("\[(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2})\] "
+                   "(\d+,\d+,\d+,\d+,\d+,\d+,\d+)"
+                   "->"
+                   "(\d+,\d+,\d+,\d+,\d+,\d+,\d+)")
+        
+    match_target = re.compile(pattern)
+
+    for line in file.readlines():
+        match = match_target.match(line)
+        if match:
+            log_time = match.group(1)
+            rx = match.group(2)
+            tx = match.group(3)
+            
+            if lane_error_type == "ue":
+                log_time = datetime.strptime(log_time, "%Y/%m/%d %H:%M:%S")
+            elif lane_error_type == "ce":
+                log_time = datetime.strptime(log_time, "%m/%d/%Y %H:%M:%S")
+
+            rx_info = rx.split(",")
+            rx = {
+                "type": "SOD" if rx_info[0] == "03" else "LD",
+                "proc": "SU" if rx_info[1] == "0" else "SD",
+                "rack": rx_info[2],
+                "cluster": rx_info[3],
+                "slot": rx_info[4],
+                "chip": rx_info[5],
+                "lane": rx_info[6]
+            }
+            tx_info = tx.split(",")
+            tx = {
+                "type": "SOD" if tx_info[0] == "03" else "LD",
+                "proc": "SU" if tx_info[1] == "0" else "SD",
+                "rack": tx_info[2],
+                "cluster": tx_info[3],
+                "slot": tx_info[4],
+                "chip": tx_info[5],
+                "lane": tx_info[6]
+            }
+
+        lanes_info.append({
+            "time": log_time,
+            "rx": rx,
+            "tx": tx
+        })
+
+log_files = {}
+pattern_time = "(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2})"
+match_time = re.compile(pattern_time)
+for lane in lanes_info:
+    devices = [lane["rx"], lane["tx"]]
+    time_failure = lane["time"]
+
+    for device in devices:
+        date_folder = datetime.strftime(time_failure,"%m-%d-%Y")
+        time_folder  = datetime.strftime(time_failure,"%H-%M-%S")
+        
+        log_file = (f'{device["type"]}_{device["rack"]}.{device["cluster"]}'
+                       f'.{device["slot"]}.log')
+
+        path_to_log = os.path.join(log_root, date_folder, log_file)
+        print(path_to_log)
+
+        log_lines = []
+        if os.path.exists(path_to_log):
+            found_timestamp = False
+            with open(path_to_log) as file:
+                for line in file:
+                    if not found_timestamp:
+                        match = match_time.match(line)
+                        if match:
+                            found_timestamp = True
+                            log_lines.append(line)
+                    else:
+                        log_lines.append(line)
+                #log_files[f"{date_folder}_{log_file}"] = log_lines
+            last_len = len(log_lines)
+            full_log = log_lines 
+            indexes_log = range(last_len)
+            line_where_time_is = [0, last_len]
+            while(True):
+                if last_len < 2:
+                    break
+                
+                first_half, second_half = halve_list(full_log)
+                first_indexes, second_indexes = halve_list(indexes_log)
+                halfs = [first_half, second_half]
+                indexes = [first_indexes, second_indexes]
+                half_index = None
+                
+                for index, half in enumerate(halfs):
+                    #test if time is greater than first entry and minor than 
+                    #last entry
+                    begin_line = half[0]
+                    end_line = half[-1]
+                    begin_time = None
+                    end_time = None
+
+                    match = match_time.match(begin_line)
+                    if match:
+                        begin_time = match.group(1)
+                        begin_time = datetime.strptime(begin_time, "%Y/%m/%d %H:%M:%S")
+
+                    match = match_time.match(end_line)
+                    if match:
+                        end_time = match.group(1)
+                        end_time = datetime.strptime(end_time, "%Y/%m/%d %H:%M:%S")
+                        
+                        
+                    if begin_time is not None and end_time is not None:
+
+                        if time_failure >= begin_time \
+                           and time_failure <= end_time:
+                           # the log is this half
+                            half_index = index
+
+                                
+                            
+
+                if half_index is None:
+                    print(first_half[-1])
+                    print(second_half[0])
+                    print(begin_time, end_time)
+                    print("deu ruim")
+                    break
+                else:
+                    full_log = halfs[half_index]
+                    indexes_log = indexes[half_index]
+                    last_len = len(full_log)
+
+            print(time_failure)
+            print(path_to_log)
+            print(list(indexes_log))
+            exit()
+            #check if log time is 

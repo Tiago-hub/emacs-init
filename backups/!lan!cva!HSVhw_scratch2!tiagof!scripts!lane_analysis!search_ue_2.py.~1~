@@ -1,0 +1,249 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3
+
+'''
+search_ue.py: Parse PDZ report log files searching for telemetry info around
+given time.
+Created on: Aug 17, 2022
+Author:     tiagof@cadence.com
+Python:     3.7
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+'''
+
+import os, sys, re
+from datetime import datetime
+import json
+
+log_roots = {
+    "jun": "/lan/cva/bldg11_eng/CustomerPDZ/Nvidia/mekong-3R/PDZ-Report_root_mekong-emu_30Jun1152/log",
+    "aug": "/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_13Aug1047/log",
+    "aug2": "/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_21Aug1416/log"
+}
+log_root = log_roots["aug2"]
+target = None
+json_name = "data_aug_2"
+search_for = "ce"
+with open("./files/nvidia_aug_2.txt") as file:
+    lanes_info = []
+    
+    if search_for == "ue":
+        pattern = "(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*? lane (\d+,\d+,\d+,\d+,\d+,\d+,\d+)->(\d+,\d+,\d+,\d+,\d+,\d+,\d+) during LSM monitoring"
+    elif search_for == "ce":
+        pattern = "\[(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2})\] (\d+,\d+,\d+,\d+,\d+,\d+,\d+)->(\d+,\d+,\d+,\d+,\d+,\d+,\d+)"
+        
+    match_target = re.compile(pattern)
+    for line in file.readlines():
+        match = match_target.match(line)
+        if match:
+            log_time = match.group(1)
+            rx = match.group(2)
+            tx = match.group(3)
+            
+            if search_for == "ue":
+                log_time = datetime.strptime(log_time, "%Y/%m/%d %H:%M:%S")
+            elif search_for == "ce":
+                log_time = datetime.strptime(log_time, "%m/%d/%Y %H:%M:%S")
+            rx_info = rx.split(",")
+            rx = {
+                "type": "SOD" if rx_info[0] == "03" else "LD",
+                "proc": "SU" if rx_info[1] == "0" else "SD",
+                "rack": rx_info[2],
+                "cluster": rx_info[3],
+                "slot": rx_info[4],
+                "chip": rx_info[5],
+                "lane": rx_info[6]
+            }
+            tx_info = tx.split(",")
+            tx = {
+                "type": "SOD" if tx_info[0] == "03" else "LD",
+                "proc": "SU" if tx_info[1] == "0" else "SD",
+                "rack": tx_info[2],
+                "cluster": tx_info[3],
+                "slot": tx_info[4],
+                "chip": tx_info[5],
+                "lane": tx_info[6]
+            }
+
+        lanes_info.append({
+            "time": log_time,
+            "rx": rx,
+            "tx": tx
+        })
+
+log_contents = {}
+telemetry = {}
+lanes_to_test = len(lanes_info) * 2
+counter = 1
+
+for lane in lanes_info:
+    date_folder = datetime.strftime(lane["time"],"%m-%d-%Y")
+    time_folder  = datetime.strftime(lane["time"],"%H-%M-%S")
+
+    tx = lane["tx"]
+    rx = lane["rx"]
+    log_file_tx = f'{tx["type"]}_{tx["rack"]}.{tx["cluster"]}.{tx["slot"]}.log'
+    log_file_rx = f'{rx["type"]}_{rx["rack"]}.{rx["cluster"]}.{rx["slot"]}.log'
+    pattern = "(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2})"
+    match_target = re.compile(pattern)
+    pattern_rx = f'.*({rx["proc"]}_{rx["chip"][0]}_{rx["chip"][1]}).*'
+    pattern_tx = f'.*({tx["proc"]}_{tx["chip"][0]}_{tx["chip"][1]}).*'
+    pattern_volt_rx = f'.*({rx["proc"]}_{rx["chip"][0]}_0).*'
+    pattern_volt_tx = f'.*({tx["proc"]}_{tx["chip"][0]}_0).*'
+    match_target_rx = re.compile(pattern_rx)
+    match_target_tx = re.compile(pattern_tx)
+    match_target_volt_rx = re.compile(pattern_volt_rx)
+    match_target_volt_tx = re.compile(pattern_volt_tx)
+
+    file_path = os.path.join(log_root,date_folder,log_file_rx)
+
+    #solve for rx
+
+    print(f'{rx} - {counter}/{lanes_to_test} lanes checked')
+
+    if f'{rx["rack"]}.{rx["cluster"]}.{rx["slot"]}' == target or target is None:
+
+        key = f'{date_folder}_{time_folder}_{log_file_rx}_{rx["proc"]}_{rx["chip"]}'
+
+        if log_contents.get(key) is None:
+            if os.path.exists(file_path):
+                with open(file_path) as file:
+                    log_contents[key] = file.readlines()
+            else:
+                log_contents[key] = ""
+        print(file_path) 
+        found_first_temp = False
+        found_first_volt = False
+
+        for line in log_contents[key]:
+            if not found_first_temp or not found_first_volt:
+                match_rx = match_target_rx.match(line)
+                match_rx_volt = match_target_volt_rx.match(line)
+                if match_rx or match_rx_volt:
+                    if telemetry.get(key) is None:
+                        telemetry[key] = {"lane": lane,
+                                         "lane_type": "rx",
+                                         "time_fail": log_time,
+                                         "temperature": {},
+                                         "voltage": {},
+                                         "first_temperature": None,
+                                         "first_voltage": None}
+                    if "Temperature" in line and match_rx:
+                        telemetry[key]["first_temperature"] = line.split()[-2]
+                        found_first_temp = True
+                    elif "V_out" in line and match_rx_volt:
+                        telemetry[key]["first_voltage"] = line.split()[-2]
+                        found_first_volt = True
+
+            match = match_target.match(line)
+            if match:
+                log_time = match.group(1)
+                log_time = datetime.strptime(log_time, "%Y/%m/%d %H:%M:%S")
+                time_diff = (lane["time"] - log_time)
+                if (abs(time_diff.total_seconds())) < 60*5:
+                    match_rx = match_target_rx.match(line)
+                    match_rx_volt = match_target_volt_rx.match(line)
+                    if match_rx or match_rx_volt:
+                        if telemetry.get(key) is None:
+                            telemetry[key] = {"lane": lane,
+                                             "lane_type": "rx",
+                                             "time_fail": log_time,
+                                             "temperature": {},
+                                             "voltage": {},
+                                             "first_temperature": None,
+                                             "first_voltage": None}
+
+                        telemetry[key]["time_fail"] = log_time.strftime("%Y-%m-%d %H:%M:%S")
+                        if "Temperature" in line and match_rx:
+                            telemetry[key]["temperature"][log_time.strftime("%Y-%m-%d %H:%M:%S")] = line.split()[-2]
+                        elif "V_out" in line and match_rx_volt:
+                            telemetry[key]["voltage"][log_time.strftime("%Y-%m-%d %H:%M:%S")] = line.split()[-2]
+
+    else:
+        print("skipping...")
+    #solve for tx
+    counter += 1
+
+    print(f'{tx} - {counter}/{lanes_to_test} lanes checked')
+    print(log_time)
+    if f'{tx["rack"]}.{tx["cluster"]}.{tx["slot"]}' == target or target is None:
+
+
+        file_path = os.path.join(log_root,date_folder,log_file_tx)
+        key = f'{date_folder}_{time_folder}_{log_file_tx}_{tx["proc"]}_{tx["chip"]}'
+
+        if log_contents.get(key) is None:
+            if os.path.exists(file_path):
+                with open(file_path) as file:
+                    log_contents[key] = file.readlines()
+            else:
+                log_contents[key] = ""
+
+        found_first_temp = False
+        found_first_volt = False
+        print(file_path)
+        for line in log_contents[key]:
+
+            if not found_first_temp or not found_first_volt:
+                match_tx = match_target_tx.match(line)
+                match_tx_volt = match_target_volt_tx.match(line)
+                if match_tx or match_tx_volt:
+                    if telemetry.get(key) is None:
+                        telemetry[key] = {"lane": lane,
+                                         "lane_type": "tx",
+                                         "time_fail": log_time,
+                                         "temperature": {},
+                                         "voltage": {},
+                                         "first_temperature": None,
+                                         "first_voltage": None}
+                    if "Temperature" in line and match_tx:
+                        telemetry[key]["first_temperature"] = line.split()[-2]
+                        found_first_temp = True
+                    elif "V_out" in line and match_tx_volt:
+                        telemetry[key]["first_voltage"] = line.split()[-2]
+                        found_first_volt = True
+           
+            match = match_target.match(line)
+            if match:
+                log_time = match.group(1)
+                log_time = datetime.strptime(log_time, "%Y/%m/%d %H:%M:%S")
+                time_diff = (lane["time"] - log_time)
+                if (abs(time_diff.total_seconds())) < 60*5:
+                    match_tx = match_target_tx.match(line)
+                    match_tx_volt = match_target_volt_tx.match(line)
+                    if match_tx or match_tx_volt:
+                        if telemetry.get(key) is None:
+                            telemetry[key] = {"lane": lane,
+                                             "lane_type": "tx",
+                                             "time_fail": log_time,
+                                             "temperature": {},
+                                             "voltage": {},
+                                             "first_temperature": None,
+                                             "first_voltage": None}
+
+                        telemetry[key]["time_fail"] = log_time.strftime("%Y-%m-%d %H:%M:%S")
+                        if "Temperature" in line and match_tx:
+                            telemetry[key]["temperature"][log_time.strftime("%Y-%m-%d %H:%M:%S")] = line.split()[-2]
+                        elif "V_out" in line and match_tx_volt:
+                            telemetry[key]["voltage"][log_time.strftime("%Y-%m-%d %H:%M:%S")] = line.split()[-2]
+
+                    #print(line)
+    counter += 1
+    print(json.dumps(telemetry, indent=4, sort_keys=True, default=str))
+
+print(telemetry)
+with open(json_name, 'w') as f:
+    data = json.dumps(telemetry, indent=4, sort_keys=True, default=str)
+    f.write(data)

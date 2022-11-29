@@ -1,13 +1,2 @@
-# Ignore everything
-*
-
-# But not these files...
-!.gitignore
-!init.el
-!org-bullets.el
-!markdown-mode.el
-!README.md
-# etc...
-
-# ...even if they are in subdirectories
-!*/
+# Ignore elpa dir
+elpa

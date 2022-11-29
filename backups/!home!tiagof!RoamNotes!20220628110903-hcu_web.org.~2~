@@ -1,0 +1,15 @@
+:PROPERTIES:
+:ID:       6eff05a7-1094-41d6-b4c6-d4fc42d3bc84
+:END:
+#+title: hcu-web
+* Requisites:
+    - Nginx
+    - setup nginx config file
+    - python Flask
+    - python flask cors (pip install -U flask-cors)
+* Idea:
+    Serve static using nginx and use python Flask server which nginx can proxy to proccess server and scripts requests
+* Activities
+** TODO Get reports dynamically
+** TODO Run python scripts from wxe branch
+** TODO Add Telegraphs to dashboard

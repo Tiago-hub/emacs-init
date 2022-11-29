@@ -1,0 +1,32 @@
+:PROPERTIES:
+:ID:       bb7763da-82fe-4944-8a45-161ac6100401
+:END:
+#+title: update-bf-uefi
+
+* Credits
+
+Andreis
+
+* Image location and unzip
+
+    The image can be found at /home/na2e/public/bootimage_update_3.7.zip
+
+    Copy it to smd root:
+
+        cp /home/na2e/public/bootimage_update_3.7.zip /root
+
+    unzip it with following command:
+
+        unzip -o /root/ bootimage_update_3.7.zip -d /
+
+** Check if files are ok
+
+    The files should have unzipped into the following directories and with
+    respective lengths
+
+    |  Length |       Date |  Time | Name                                            |
+    | 2389080 | 10-05-2021 | 06:39 | diskless/blueos/2.0/reldir/BootImage/LD.bfb     |
+    | 2389080 | 10-05-2021 | 06:39 | diskless/blueos/2.0/reldir/BootImage/SOD.bfb    |
+    |   19972 | 09-13-2021 | 08:40 | diskless/blueos/2.0/reldir/Scripts/BFInstall.sh |
+    |   12466 | 10-12-2021 | 07:06 | root/update_bootimage                           |
+* Upgrade script

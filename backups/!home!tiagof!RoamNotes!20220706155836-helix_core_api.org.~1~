@@ -1,0 +1,8 @@
+:PROPERTIES:
+:ID:       4c6e3110-8dd3-43c0-a348-ec9bab44358d
+:END:
+#+title: Helix-core-api
+
+* How to compile a sample file
+g++ -lrt -c -g -D_GNU_SOURCE sample/p4api.cc -Iinclude/p4
+g++ -lrt -o sample/p4api p4api.o lib/libclient.a lib/librpc.a lib/libsupp.a

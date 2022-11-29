@@ -1,0 +1,11 @@
+:PROPERTIES:
+:ID:       a8f67758-6050-4fce-af27-175dcebabbfc
+:END:
+#+title: 2022-07-06
+* Perforce api
+    Succesfuly compiled the c sample given by helix core
+* HCU/Telegraphs
+    - Cleaned repo files
+    - Start the remake of Telegraphs inside dashboard. Steup the html, research
+      about js plotly
+    - Updated HCU [[file:~/RoamNotes/][test]]  file

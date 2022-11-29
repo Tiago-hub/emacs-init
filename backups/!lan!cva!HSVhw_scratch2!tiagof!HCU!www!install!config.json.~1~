@@ -1,0 +1,12 @@
+{
+    "required": {
+        "linux": ["nginx"],
+        "python": ["flask", "flask-cors", "gunicorn"]
+    },
+
+    "container access": {
+        "user": "root",
+        "password": "cadence",
+        "sql_pass": "Cadence!123"
+    }
+}

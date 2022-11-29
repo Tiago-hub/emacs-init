@@ -1,0 +1,130 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : scan_temperatures.py
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+
+import os, sys, re
+from datetime import datetime
+import optparse
+import time
+start_time = time.time()
+
+p = optparse.OptionParser()
+p.add_option
+
+p.add_option("-t",
+             action="store",
+             dest="lane_error_type",
+             )
+p.add_option("--log_root",
+            action = "store",
+            dest="log_root")
+
+p.add_option("--target",
+            action="store",
+            dest="target")
+
+p.add_option("--failing_lanes",
+            action="store",
+            dest="failing_lanes")
+
+p.set_defaults(lane_error_type="ce")
+p.set_defaults(log_root=None)
+p.set_defaults(target=None)
+p.set_defaults(failing_lanes="./files/nvidia_aug_2.txt")
+
+opts, args = p.parse_args();  # if -h or --help, display help output and exit
+
+
+log_roots = {
+    "jun": "/lan/cva/bldg11_eng/CustomerPDZ/Nvidia/mekong-3R/PDZ-Report_root_mekong-emu_30Jun1152/log",
+    "aug": "/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_13Aug1047/log",
+    "aug2": "/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_21Aug1416/log"
+}
+
+log_root = opts.log_root if opts.log_root is not None else log_roots["aug2"]
+target = opts.target
+json_name = f'data_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json'
+failing_lanes = opts.failing_lanes
+lane_error_type = opts.lane_error_type
+
+lanes_info = []
+with open(failing_lanes) as file:
+    
+    if lane_error_type == "ue":
+        pattern = "(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*? lane (\d+,\d+,\d+,\d+,\d+,\d+,\d+)->(\d+,\d+,\d+,\d+,\d+,\d+,\d+) during LSM monitoring"
+    elif lane_error_type == "ce":
+        pattern = "\[(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2})\] (\d+,\d+,\d+,\d+,\d+,\d+,\d+)->(\d+,\d+,\d+,\d+,\d+,\d+,\d+)"
+        
+    match_target = re.compile(pattern)
+    for line in file.readlines():
+        match = match_target.match(line)
+        if match:
+            log_time = match.group(1)
+            rx = match.group(2)
+            tx = match.group(3)
+            
+            if lane_error_type == "ue":
+                log_time = datetime.strptime(log_time, "%Y/%m/%d %H:%M:%S")
+            elif lane_error_type == "ce":
+                log_time = datetime.strptime(log_time, "%m/%d/%Y %H:%M:%S")
+
+            rx_info = rx.split(",")
+            rx = {
+                "type": "SOD" if rx_info[0] == "03" else "LD",
+                "proc": "SU" if rx_info[1] == "0" else "SD",
+                "rack": rx_info[2],
+                "cluster": rx_info[3],
+                "slot": rx_info[4],
+                "chip": rx_info[5],
+                "lane": rx_info[6]
+            }
+            tx_info = tx.split(",")
+            tx = {
+                "type": "SOD" if tx_info[0] == "03" else "LD",
+                "proc": "SU" if tx_info[1] == "0" else "SD",
+                "rack": tx_info[2],
+                "cluster": tx_info[3],
+                "slot": tx_info[4],
+                "chip": tx_info[5],
+                "lane": tx_info[6]
+            }
+
+        lanes_info.append({
+            "time": log_time,
+            "rx": rx,
+            "tx": tx
+        })
+
+
+print(len(lanes_info))
+for lane in lanes_info:
+    devices = [lane["rx"], lane["tx"]]
+    time_failure = lane["time"]
+
+    for device in devices:
+        date_folder = datetime.strftime(time_failure,"%m-%d-%Y")
+        time_folder  = datetime.strftime(time_failure,"%H-%M-%S")
+        
+        log_file_tx = f'{device["type"]}_{device["rack"]}.{device["cluster"]}.{device["slot"]}.log'
+ 

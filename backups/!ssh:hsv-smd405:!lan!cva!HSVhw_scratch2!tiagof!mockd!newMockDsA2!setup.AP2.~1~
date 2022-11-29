@@ -1,0 +1,30 @@
+setenv LDVHOME /grid/avs/install/xcelium/2003/20.03.001/tools.lnx86
+setenv QTHOME /lan/cva_rel/wxe21h1/21.00.176.a005
+setenv IXCOM_HOME /lan/cva_rel/ixcom20h1/red
+setenv HDLICE_HOME /lan/cva_rel/hdlice20h1/red
+
+setenv AXIS_HOME $QTHOME/tools.lnx86
+setenv UXE_HOME $QTHOME
+setenv UXEHOME $UXE_HOME
+
+setenv CDN_INST_DIR $LDVHOME
+setenv CDS_INST_DIR $LDVHOME
+setenv ldvrel $LDVHOME
+setenv NC_INST_DIR $LDVHOME
+setenv VERPLEX_HOME /icd/conformal/vpxqa/data/dailyRelease/daily.lec
+
+setenv TB_INSTALL $LDVHOME/tools.lnx86/TestBuilder/TB_install
+
+
+setenv PATH ./:$LDVHOME/bin:$QTHOME/tools.lnx86/bin:$IXCOM_HOME/tools.lnx86/bin:/$HDLICE_HOME/tools.lnx86/bin:usr/lib64/qt-3.3/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/bin:/opt/make-3.80/bin:/usr/ccs/bin:/grid/common/bin:/usr/X/bin:$VERPLEX_HOME/tools.lnx86/bin:/usr/atria/bin:/usr/sbin:/sbin
+
+setenv LD_LIBRARY_PATH ./:$LDVHOME/tools.lnx86/TestBuilder/TB_install/lib:$LDVHOME/lib:$LDVHOME/inca/lib:$QTHOME/tools.lnx86/lib/64bit:$IXCOM_HOME/tools.lnx86/lib/64bit:$HDLICE_HOME/tools.lnx86/lib/64bit:$LDVHOME/jre/lib/sparc/native_threads:/usr/local/lib:/usr/dt/lib:/usr/openwin/lib:/usr/lib::$VERPLEX_HOME/tools.lnx86/lib
+
+setenv ET_SKIP_MBS 1
+
+setenv CDS_LIC_FILE /home/shuling/lic/cva-xeon192_ECF4BBC20EA0.txt:5280@cva-xeon192:5280@sjflex2.cadence.com:5280@sjflex3.cadence.com:5280@sjflex1.cadence.com
+
+unlimit maxproc
+
+unsetenv ET_NO_KEEPHOT
+unsetenv ET_USE_BACKPLANE_LD7

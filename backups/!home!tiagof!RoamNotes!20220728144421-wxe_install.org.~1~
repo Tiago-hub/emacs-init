@@ -1,0 +1,19 @@
+:PROPERTIES:
+:ID:       42a8214a-2c71-421b-bddd-f4781930f597
+:END:
+#+title: wxe_install
+
+The wxe install webpage aims to be a user friendly web page that can install a
+wxe release.
+
+* Features
+ - Select the wxe release
+   - Need to read availalble releases from file structure
+ - Access tc reports
+   - Need to store them somewhere, also parse it. Maybe post it to wiki and them
+     redirect it?
+
+* To be defined
+ - [ ] Will be local or hosted in one smd
+   - [ ] Which smd in that case?
+ - [ ] Will have some user control?

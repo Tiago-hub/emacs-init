@@ -1,0 +1,25 @@
+import AbstractView from "./AbstractView.js";
+
+export default class extends AbstractView {
+    constructor(params) {
+        super(params);
+        this.setTitle("Home");
+    }
+
+    async getHtml() {
+        const response = await fetch('html/Home.html');
+        let text = ""
+        if(response.ok){
+            text = await response.text();
+        }
+        else{
+            console.log('Network response was not ok')
+            text = ''
+        }
+        return text
+    }
+
+    async initDropdowns() {
+        console.log("test")
+    }
+}

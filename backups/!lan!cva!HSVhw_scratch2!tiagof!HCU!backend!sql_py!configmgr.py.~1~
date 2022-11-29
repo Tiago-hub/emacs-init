@@ -1,0 +1,13 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3
+import sqlalchemy as db
+if __name__ == "__main__":
+    from classes import DatabaseOperation
+else:
+    # import using the __init__.py
+    from sql_py.classes import DatabaseOperation
+
+
+class Temperature(DatabaseOperation):
+    def __init__(self, *args, **kwargs):
+        super(Temperature, self).__init__(table_name="Temperature")
+

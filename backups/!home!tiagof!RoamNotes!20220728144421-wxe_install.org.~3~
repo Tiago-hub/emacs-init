@@ -1,0 +1,150 @@
+:PROPERTIES:
+:ID:       42a8214a-2c71-421b-bddd-f4781930f597
+:END:
+#+title: wxe_install
+
+The wxe install webpage aims to be a user friendly web page that can install a
+wxe release.
+
+* Features
+ - Select the wxe release
+   - Need to read availalble releases from file structure
+ - Access tc reports
+   - Need to store them somewhere, also parse it. Maybe post it to wiki and them
+     redirect it?
+ - Python backend using Flask
+
+* To be defined
+ - [ ] Will be local or hosted in one smd
+   - [ ] Which smd in that case?
+ - [ ] Will have some user control?
+
+* Development
+** TODO -> get list of all emulators
+    - [X] Install nmap into host machine
+    - [X] Discover the available smds in networks
+      For that used nmap to scan every ip from 10.206.144.0 to 10.206.144.255
+      using the following command:
+      nmap -sn 10.206.144.0/24 | grep "smd"
+
+      #+begin_src shell
+        nmap -sn 10.206.144.0/24 | grep "smd" 
+      #+end_src
+
+      #+RESULTS:
+      | Nmap | scan | report | for | hsv-smd401.cadence.com  | (10.206.144.5)   |
+      | Nmap | scan | report | for | hsv-smd403.cadence.com  | (10.206.144.8)   |
+      | Nmap | scan | report | for | hsv-smd404.cadence.com  | (10.206.144.9)   |
+      | Nmap | scan | report | for | hsv-smd405.cadence.com  | (10.206.144.19)  |
+      | Nmap | scan | report | for | hsv-smd26.cadence.com   | (10.206.144.62)  |
+      | Nmap | scan | report | for | hsv-smd27.cadence.com   | (10.206.144.63)  |
+      | Nmap | scan | report | for | hsv-smd30.cadence.com   | (10.206.144.68)  |
+      | Nmap | scan | report | for | hsv-smd406.cadence.com  | (10.206.144.78)  |
+      | Nmap | scan | report | for | hsv-smd407.cadence.com  | (10.206.144.79)  |
+      | Nmap | scan | report | for | hsv-smd28.cadence.com   | (10.206.144.86)  |
+      | Nmap | scan | report | for | hsv-smd29.cadence.com   | (10.206.144.87)  |
+      | Nmap | scan | report | for | pe-smd17.cadence.com    | (10.206.144.97)  |
+      | Nmap | scan | report | for | hsv-smd408.cadence.com  | (10.206.144.123) |
+      | Nmap | scan | report | for | hsv-smd409.cadence.com  | (10.206.144.124) |
+      | Nmap | scan | report | for | hsv-smd32.cadence.com   | (10.206.144.134) |
+      | Nmap | scan | report | for | hsv-smd411a.cadence.com | (10.206.144.138) |
+      | Nmap | scan | report | for | hsv-smd411b.cadence.com | (10.206.144.139) |
+      | Nmap | scan | report | for | hsv-smd413.cadence.com  | (10.206.144.164) |
+      | Nmap | scan | report | for | hsv-smd414.cadence.com  | (10.206.144.165) |
+      | Nmap | scan | report | for | hsv-smd415.cadence.com  | (10.206.144.166) |
+      | Nmap | scan | report | for | hsv-smd416.cadence.com  | (10.206.144.167) |
+      | Nmap | scan | report | for | hsv-smd412.cadence.com  | (10.206.144.176) |
+      | Nmap | scan | report | for | te-smd1.cadence.com     | (10.206.144.182) |
+      | Nmap | scan | report | for | mfg-smd1.cadence.com    | (10.206.144.194) |
+      | Nmap | scan | report | for | mfg-smd2.cadence.com    | (10.206.144.195) |
+      | Nmap | scan | report | for | hsv-smd22.cadence.com   | (10.206.144.230) |
+      | Nmap | scan | report | for | mfg-smd12.cadence.com   | (10.206.144.248) |
+
+      Then I can use awk and cut to extract just the hostname of the smds
+
+      #+begin_src shell
+        nmap -sn 10.206.144.0/24 | grep "smd" | awk '{print $5}' | cut -d '.' -f1
+      #+end_src
+
+      #+RESULTS:
+      | hsv-smd401  |
+      | hsv-smd403  |
+      | hsv-smd404  |
+      | hsv-smd405  |
+      | hsv-smd26   |
+      | hsv-smd27   |
+      | hsv-smd30   |
+      | hsv-smd406  |
+      | hsv-smd407  |
+      | hsv-smd28   |
+      | hsv-smd29   |
+      | pe-smd17    |
+      | hsv-smd408  |
+      | hsv-smd409  |
+      | hsv-smd32   |
+      | hsv-smd411a |
+      | hsv-smd411b |
+      | hsv-smd413  |
+      | hsv-smd414  |
+      | hsv-smd415  |
+      | hsv-smd416  |
+      | hsv-smd412  |
+      | te-smd1     |
+      | mfg-smd1    |
+      | mfg-smd2    |
+      | hsv-smd22   |
+      | mfg-smd12   |
+
+      Finally using sed this ouptut can be formated to json and saved to file
+      
+      sed 's/^/"/;1s/^/[/;1s/^/{"emulators":/;s/$/"/;$!s/$/,/;$s/$/]/;$s/$/}/'
+    - [X] Create script to auto run the nmap, filter output and save to file
+      with smd names
+    - [X] Read this file into server to list for user the available emulators
+    - [ ] Define a cronjob to update the smd files 
+* TODO -> get list of all ibhosts
+    Can go straightforward with same idea for emulators, but using 158.140.43.0/24
+    ip pattern. Need to check with Chris how to procede because there is a lot of
+    machines and don't know if like we can use everything.
+    For now I'm going to just write the json by hand
+    #+begin_src shell
+      nmap -sn 158.140.43.0/24 | grep "\-sc"
+    #+end_src
+
+    #+RESULTS:
+    | Nmap | scan | report | for | hsv-sc47.cadence.com   | (158.140.43.5)   |
+    | Nmap | scan | report | for | hsv-sc38.cadence.com   | (158.140.43.58)  |
+    | Nmap | scan | report | for | hsv-sc44.cadence.com   | (158.140.43.60)  |
+    | Nmap | scan | report | for | hsv-sc22.cadence.com   | (158.140.43.63)  |
+    | Nmap | scan | report | for | hsv-scd107.cadence.com | (158.140.43.81)  |
+    | Nmap | scan | report | for | hsv-sc52.cadence.com   | (158.140.43.104) |
+    | Nmap | scan | report | for | hsv-sc27.cadence.com   | (158.140.43.109) |
+    | Nmap | scan | report | for | hsv-sc48.cadence.com   | (158.140.43.113) |
+    | Nmap | scan | report | for | pe-sc24.cadence.com    | (158.140.43.121) |
+    | Nmap | scan | report | for | hsv-sc50.cadence.com   | (158.140.43.134) |
+    | Nmap | scan | report | for | mfg-scd2.cadence.com   | (158.140.43.150) |
+    | Nmap | scan | report | for | mfg-scd4.cadence.com   | (158.140.43.156) |
+    | Nmap | scan | report | for | sw-scd1.cadence.com    | (158.140.43.162) |
+    | Nmap | scan | report | for | mfg-scd8.cadence.com   | (158.140.43.168) |
+    | Nmap | scan | report | for | hsv-sc21.cadence.com   | (158.140.43.174) |
+    | Nmap | scan | report | for | pe-scd3.cadence.com    | (158.140.43.197) |
+    | Nmap | scan | report | for | pe-scd4.cadence.com    | (158.140.43.201) |
+    | Nmap | scan | report | for | hsv-sc49.cadence.com   | (158.140.43.206) |
+    | Nmap | scan | report | for | hsv-sc51.cadence.com   | (158.140.43.214) |
+    | Nmap | scan | report | for | hsv-scd116.cadence.com | (158.140.43.218) |
+    | Nmap | scan | report | for | hsv-sc16.cadence.com   | (158.140.43.229) |
+    | Nmap | scan | report | for | hsv-sc26.cadence.com   | (158.140.43.249) |
+
+
+* TODO -> get list of branches
+    - [ ] For now hardcoded to be 21h1, 22h1, main. Check with Chris/Bruno if there is
+    some place to get those info
+* DONE -> get list of available versions
+    - [X] Need to remove entries like xeDiags, etc
+
+* TODO -> run install script
+    - [ ] Create dir to host the source code
+    - [ ] Check if dir is empty. If empty, clone repo
+    - [ ] Check with fetch if there is any change to pull
+    - [ ] Pull changes
+    - [ ] Run script passing given parameters

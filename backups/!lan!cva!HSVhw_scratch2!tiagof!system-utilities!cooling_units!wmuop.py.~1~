@@ -1,0 +1,152 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : wmuop
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+
+import pexpect
+import argparse
+from subprocess import run
+
+
+DESCRIPTION="Script to read/set CL temperature on WKU"
+
+
+def get_wku_mac():
+    """ Return the WKU mac address as a string """
+    subproc_res = run(["/et3mach/bin/apsm", "-r"], capture_output=True,
+                      text=True, check=True)
+    for line in subproc_res.stdout.splitlines():
+        if "WKU" in line:
+            return line.split()[5]
+    else:
+        return None
+
+
+def get_wku_ip(mac_addr):
+    """ Return the IP based on BM MAC addr from WKU """
+    with open("/etc/dhcp/poe-fixed-ip.conf", "r") as file_d:
+        for line in file_d:
+            if mac_addr.lower() in line.lower():
+                next_line = next(file_d, None)
+                if "fixed-address" not in next_line:
+                    raise Exception(f"Line after MAC addr {mac_addr} did not "
+                                    f"contained the fixed-address field")
+                else:
+                    return next_line.split()[1].rstrip(";")
+        else:
+            return None
+
+
+class WKU:
+    """ Handler to operate WKU unit in the rack """
+
+    READ_TEMP_CMD = "mbget -t 127.0.0.1 -T 700 -a 40004 -r 1"
+    WRITE_TEMP_CMD = "mbget -t 127.0.0.1 -T 700 -a 40004 -w "
+    def __init__(self, ip_addr, password):
+        self.ip_addr = ip_addr
+        self.session = pexpect.spawn(f"ssh -o StrictHostKeyChecking=no root@{self.ip_addr}")
+        self.session.expect("password: *")
+        self.session.sendline(password)
+        self.session.expect("dclc:~# *")
+
+    def read_temp(self):
+        """ Reads the temperature from WKU using the instantiated pexpect
+            session
+        """
+        self.session.sendline(self.READ_TEMP_CMD)
+        self.session.expect("dclc:~# *")
+        result_raw = self.session.before.decode("utf-8").strip()
+        result = result_raw.splitlines()[1]
+        result_in_c = int(result.split()[1]) / 10
+        return result_in_c, result
+
+    def write_temp(self, value):
+        """ Writes a new temperature in the WKU CL register """
+        if not 20 <= value <= 40:
+            raise ValueError("Set temperature between 20C and 40C")
+        cmd = self.WRITE_TEMP_CMD + f"{value * 10}"
+        print(f"[INFO] Setting temperature to {value}C (Reg: {value * 10})")
+        print(f"[DEBG] Cmd: '{cmd}'")
+        self.session.sendline(self.WRITE_TEMP_CMD + f"{value * 10}")
+        self.session.expect("dclc:~# *")
+        result = self.session.before.decode("utf-8").strip()
+        return result
+
+    def close(self):
+        """ Closes the Pexpect session """
+        self.session.sendline("exit")
+
+
+def main():
+    """ Handles command line arguments to either read or set CL temperature """
+    cmd_parse = argparse.ArgumentParser(description=DESCRIPTION)
+    cmd_parse.add_argument("--read",
+                           action="store_true",
+                           default=False,
+                           help="Returns the CL temperature")
+    cmd_parse.add_argument("--set",
+                           default="20C",
+                           help="Set the temperature to the desired value "
+                           "(default 20C)")
+    cmd_parse.add_argument("--addr",
+                           default=None,
+                           help="IP address to the WKU cmd prompt")
+    cmd_parse.add_argument("--password",
+                           default="cadence",
+                           help="Password to access the WKU cmd prompt "
+                           "(Example: cadence)")
+
+    opts = cmd_parse.parse_args()
+
+    wku_mac = get_wku_mac()
+    if opts.addr is None:
+        if wku_mac is None:
+            print("[ !! ] No WKU BM was found on 'apsm -r'")
+            exit(1)
+        else:
+            try:
+                wku_ip_addr = get_wku_ip(wku_mac)
+            except PermissionError:
+                print("[ !! ] Script need to be executed as root or with sudo")
+                exit(1)
+    else:
+        wku_ip_addr = opts.addr
+
+    wku_handler = WKU(wku_ip_addr, opts.password)
+
+    if opts.read:
+        print(f"[    ] Reading temperature from WKU at {wku_ip_addr}")
+        temp_read, reg_value = wku_handler.read_temp()
+        print(f"[ OK ] Temperature: {temp_read}C (Reg: {reg_value})")
+    else:
+        if "C" in opts.set.upper():
+            temp = int(opts.set.upper().replace("C", ""))
+        else:
+            temp = int(opts.set)
+        wku_handler.write_temp(temp)
+    wku_handler.close()
+    exit(0)
+
+
+if __name__ == "__main__":
+    main()

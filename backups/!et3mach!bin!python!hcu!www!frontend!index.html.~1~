@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCU</title>
+    <link rel="stylesheet" href="/css/index.css">
+    <link href="/dist/css/select2.min.css" rel="stylesheet" />
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav__link" data-link>Dashboard</a>
+        <a href="/reports" class="nav__link" data-link>Reports</a>
+        <a href="/telegraphs" class="nav__link" data-link>Telegraphs</a>
+    </nav>
+    <div id="heading" style="text-align:center;">
+        <h1>Health Check Utility</h1>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="/js/index.js"></script>
+    <script src="/dist/js/jquery3.6.0.js"></script>
+    <script src="/dist/js/select2.min.js"></script>
+    <script src="/dist/js/plotly-2.12.1.min.js"></script>
+    <script src="/dist/js/js.cookie.min.js"></script>
+</body>
+</html>

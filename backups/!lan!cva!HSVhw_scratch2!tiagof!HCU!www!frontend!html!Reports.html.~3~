@@ -1,0 +1,31 @@
+<h1>Reports generation</h1>
+    <p>
+        Generate reports from data available into hcu database
+    </p>
+    <form id="form-report"> 
+        <p>
+            <label for="start-date">Start date:</label>
+            <input type="datetime-local" id="start-date" name="start-date" required>
+
+            <label for="end-date">End date:</label>
+            <input type="datetime-local" id="end-date" name="end-date" required>
+
+            <label for="report-type">Choose a report type:</label>
+            <select name="report-type" id="report-type" required>
+                <option value="serdes">Lane Details</option>
+                <option value="sys_aval">System Avail</option>
+            </select>
+
+            <label for="emulator">Choose an emulator</label>
+            <select name="emulator" id="emulator" required>
+                <option value="mfg-smd12">smd12</option>
+            </select>
+
+        </p>
+        <p>
+          <input type="submit" value="Generate">
+        </p>
+    </form>
+    <p>
+        <a href="/" data-link>Return to home</a>.
+    </p>

@@ -1,0 +1,48 @@
+                            ________________
+
+                               LD_TEST_V2
+
+                             Tiago Ferreira
+                            ________________
+
+
+Table of Contents
+_________________
+
+1. Normal conditions
+.. 1. Result
+2. Stress conditions
+
+
+As Bruno mentioned, there is a issue with mockD run in my tests. Thanks
+to Andrei, I managed to fix it. Basically in the mockD dir where the job
+is compiled it should be created the "mockTop.bp" file to ensure the job
+will use the selected board it is compiled.
+
+
+1 Normal conditions
+===================
+
+  From compiling directory, following the standar procedure for mockD
+  jobs described in
+  <https://wiki.cadence.com/confluence/display/~jhonatan/Palladium+1st+Hand%27s+On>
+
+  ,----
+  | ../compile 1 hsv-smd405 114 imem
+  | echo 114 > mockTop.bp 
+  | ../run hsv-smd405
+  `----
+
+
+1.1 Result
+~~~~~~~~~~
+
+  Run successfully.  Logs available at:
+  /home/tiagof/temp/test_new_ld/mockD/newMockDsA2/1D_smd405_new
+
+
+2 Stress conditions
+===================
+
+  Run successfully.  Logs available at:
+  /home/tiagof/temp/test_new_ld/mockD/newMockDsA2/1D_smd405_stress_new

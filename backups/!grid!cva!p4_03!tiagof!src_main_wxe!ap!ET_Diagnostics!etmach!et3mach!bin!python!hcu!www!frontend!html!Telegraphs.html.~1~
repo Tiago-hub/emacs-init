@@ -1,0 +1,16 @@
+<div>
+    <div>
+        <h1>Telegraphs</h1><label>The friendly telemetry graphing</label>
+    </div>
+    <div><label>Start Date</label><input type="datetime-local" min="00:00" max="23:59" step="60" id="startdate"
+            persisted_props="value" persistence_type="local" value=""
+            style="margin-right: 10px; margin-left: 10px;"><label>End Date</label><input type="datetime-local"
+            min="00:00" max="23:59" step="60" id="enddate" persisted_props="value" persistence_type="local" value=""
+            style="margin-right: 10px; margin-left: 10px;"><br><button id="btn-add-measure">Add measure</button></div>
+    <div id="measures-holder"></div>
+    <div>
+        <div id="graph-with-slider" class="dash-graph">
+        </div>
+
+    </div>
+</div>

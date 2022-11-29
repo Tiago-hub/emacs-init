@@ -1,0 +1,163 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3
+import sqlalchemy as db
+
+
+class DatabaseOperation:
+    """
+    MySQL Database basic operation:
+    1. Create an engine
+    2. Create a session for an engine to add/commit data into database
+    3. Ingest to tables where engine points to
+    """
+
+    def __init__(self, user="tiagof", passw="Lele_2904",
+                 ipaddress="158.140.43.118", db_name="Nvidia_Z2_Mekong",
+                 table_name=None):
+        """
+        Define some global variables in this class
+        """
+        self.engine = None
+        self.connection = None
+        self.db_info = f"mysql+pymysql://{user}:{passw}@{ipaddress}/"
+        self.db_name = db_name
+        self.table_name = table_name
+        self.create_db_engine()
+        self.connect()
+        self.metadata = db.MetaData()
+        self.table = db.Table(self.table_name, self.metadata, autoload=True,
+                              autoload_with=self.engine)
+
+    def create_db_engine(self):
+        """
+        Create a database engine to work on
+        :param database_info (String): username, password and location of db
+        eg. 'mysql+pymysql://ycui:cadence@wfbdell82a/'
+        :param database_name (String): which database users work on
+        eg. '8RZ1'
+        :return: self.engine
+        """
+        engine_name = self.db_info + self.db_name + "?charset=utf8"
+        try:
+            self.engine = db.create_engine(engine_name)
+            return self.engine
+        except BaseException:
+            print('There is no Engine created for accessing Database')
+            raise
+
+    def connect(self):
+        try:
+            self.connection = self.engine.connect()
+        except Exception as e:
+            print(e)
+
+    def create_db_session(self):
+        """
+        Create a session to add and commit data into tables
+        :return: session
+        """
+        try:
+            base = db.declarative_base()
+            base.metadata.bind = self.engine
+            DBSession = db.sessionmaker(bind=self.engine)
+            session = DBSession()
+            return session
+        except BaseException:
+            print('Create session failed')
+            raise
+
+    def get_all(self, debug=False):
+        query = db.select([self.table])
+        if debug:
+            print(query)
+        Result = self.connection.execute(query)
+        ResultSet = []
+        for row in Result:
+            ResultSet.append(dict(row))
+        return ResultSet
+
+    def search(self, search_dict={}, debug=False):
+        wheres = []
+        for column, search in search_dict.items():
+            temp = getattr(self.table.columns, column)
+            wheres.append(temp.contains(search))
+        where = db.and_(*wheres)
+        query = db.select([self.table]).where(where)
+        if debug:
+            print(query)
+        Result = self.connection.execute(query)
+        ResultSet = []
+        for row in Result:
+            ResultSet.append(dict(row))
+        return ResultSet
+
+    def search_by_date(self, start, end, debug=False):
+        try:
+            if getattr(self.table.columns, "ingesttime") is None:
+                raise Exception(f"The {self.table} table does not have ingesttime")
+            where = db.and_(self.table.columns.ingesttime >= start,
+                            self.table.columns.ingesttime <= end)
+            query = db.select([self.table]).where(where)
+            if debug:
+                print(query)
+                print(start)
+                print(end)
+            Result = self.connection.execute(query)
+            ResultSet = []
+            for row in Result:
+                ResultSet.append(dict(row))
+            return ResultSet
+
+        except Exception as e:
+            print(e)
+            return None
+
+    def board_number_to_address(self, board_type, board_number):
+        board_number = int(board_number)
+        if "ld" in board_type.lower():
+            rack = board_number // 18
+            cluster = (board_number - 18*rack) // 6
+            board = board_number - 18*rack - 6*cluster
+            board_address = f"{rack}.{cluster}.{board}"
+        elif "sod" in board_type.lower():
+            rack = board_number // 3
+            cluster = (board_number - 3*rack)
+            board = 0
+            board_address = f"{rack}.{cluster}.{board}"
+
+        return board_address
+
+    def board_address_to_number(self, board_type, board_address):
+        rack, cluster, board = board_address.split(".")
+        rack = int(rack)
+        cluster = int(cluster)
+        board = int(board)
+        if "ld" in board_type.lower():
+            board_number = board + 18*rack + 6*cluster
+        elif "sod" in board_type.lower():
+            board_number = cluster + 3*rack
+
+        return board_number
+
+
+if __name__ == "__main__":
+
+    db_info = "mysql+pymysql://tiagof:Lele_2904@172.17.0.2/"
+    db_name = "emulator"
+
+    user = "root"
+    passw = "Cadence!123"
+    ip = "172.17.0.2"
+    ip = "158.140.43.118"
+
+    database = DatabaseOperation(user, passw, ip, db_name)
+    database.create_db_engine()
+    database.connect()
+    metadata = db.MetaData()
+    print(database.engine)
+    table = db.Table('Pressure', metadata, autoload=True,
+                     autoload_with=database.engine)
+    query = db.select([table])
+    print(query)
+    Result = database.connection.execute(query)
+    ResultSet = Result.fetchall()
+    print(len(ResultSet))

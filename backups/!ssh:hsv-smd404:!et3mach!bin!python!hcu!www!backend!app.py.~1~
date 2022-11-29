@@ -1,0 +1,120 @@
+#!/bin/python3
+
+from socket import timeout
+from flask import Flask, request
+from flask_cors import CORS, cross_origin
+import subprocess as commands
+from datetime import datetime
+import re
+import os
+import paramiko
+from paramiko_expect import SSHClientInteraction
+
+parent = os.path.dirname(os.getcwd())
+download_dir = os.path.join(parent,"frontend","public","files")
+def p4_get_ws_root():
+    cmd='p4 info'
+    output=commands.getoutput(cmd)
+    m = re.search('Client root: ([^ \n\r\t]+)', output)
+    if not m: return 0
+    return m.group(1)
+
+app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+'''
+1 ssh into smd
+2 ssh into docker
+3 run report generation
+'''
+hcu_path = "/Cadence/emulator/hcu"
+'''Generate HCU report: python a2_hcu_offline.py  -company <customer_DB_name>  -s  <start_date>  -e  <end_date>  [-des  <destination_path>]'''
+
+@app.route('/', methods=['GET', 'POST'])
+@cross_origin()
+def index():
+    data = request.values
+    start = data.get('start-date')
+    end = data.get('end-date')
+    report = data.get('report-type')
+    emulator = data.get('emulator')
+
+    start = datetime.strptime(start, "%Y-%m-%dT%H:%M")
+    end = datetime.strptime(end, "%Y-%m-%dT%H:%M")
+    start_date = start.strftime("%Y-%m-%d")
+    end_date = end.strftime("%Y-%m-%d")
+
+    #get user
+    cmd2run = ["whoami"]
+    subproc = commands.run(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True)
+    user1 = subproc.stdout.strip()
+
+    pass1 = ""
+    user2 = "root"
+    pass2 = "cadence"
+
+    print(emulator)
+    # SSH to smd
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(
+        paramiko.AutoAddPolicy())
+
+    ssh_client.connect(hostname=emulator, username=user1, password=pass1)
+    user_prompt = '.*\$ '
+    root_prompt = '.*root.*'
+    pass_prompt = '.*assword: '
+    file_path = ''
+
+    # Interact with SSH client
+    with SSHClientInteraction(ssh_client, display=True) as interact:
+        #get container ip
+
+        cmd2run = f"sudo docker inspect -f \"\u007b\u007b.NetworkSettings.IPAddress \u007d\u007d\" hcu_{emulator}"
+        interact.send(cmd2run)
+        interact.expect(user_prompt)
+        container_ip = "".join(interact.current_output_clean.split("\n")[-3])
+        print(container_ip)
+
+        # Send the command to SSH as root to the final host
+        interact.send('ssh -o stricthostkeychecking=no -o userknownhostsfile=/dev/null {}@{}'.format(user2,container_ip))
+        # Expect the password prompt
+        interact.expect(pass_prompt)
+        # Send the root password
+        interact.send(pass2)
+        # Expect the root prompt
+        interact.expect(root_prompt)
+
+        # Now let's do the same for the ls command but also set a timeout for this
+        # specific expect (overriding the default timeout)
+        cmd = f"python3 {hcu_path}/test_suit.py -db emulator -start {start_date} -end {end_date} -report {report}"
+        interact.send(cmd)
+        interact.expect(root_prompt, timeout=1000)
+
+        answer = "".join(interact.current_output_clean.split("\n")[-2])
+        file_path= answer.split(":")[1].strip()
+        file_name = file_path.split("/")[-1]
+
+    ssh_client.close()
+    ssh_client.connect(hostname=emulator, username=user1, password=pass1)
+
+
+    with SSHClientInteraction(ssh_client, display=True) as interact:
+        interact.send('scp -o stricthostkeychecking=no -o userknownhostsfile=/dev/null {}@{}:/{} {}'.format(user2,container_ip,file_path,download_dir))
+        # Expect the password prompt
+        interact.expect(pass_prompt)
+        # Send the root password
+        interact.send(pass2)
+        interact.expect(user_prompt)
+
+    ssh_client.close()
+
+    return file_name
+
+@app.route('/greet')
+@cross_origin()
+def say_hello():
+  return 'Hello from Server'
+
+
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0', port = 8050)

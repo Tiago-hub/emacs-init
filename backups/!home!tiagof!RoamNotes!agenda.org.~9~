@@ -1,0 +1,75 @@
+#+TODO: TODO IN-PROGRESS | DONE
+
+* DONE Test new substrates and DIMM modules
+** DONE reboot LDs using xeDiags
+** DONE run mockD only for those boards
+*** DONE Check for errors
+** DONE Run stress test
+*** DONE Lower 5% for several rails (including DIMMs 1.2V nominal)
+    /et3mach/HW_DIAG/ld/diag -m <host> -d <bdevid> -c "set -tvmar1 -pvmargin=1; run -f -tvmar1"
+*** DONE Lower 4% for Sd SerDesCore (0.88V nominal):
+    /et3mach/HW_DIAG/ld/diag -m <host> -d <bdevid> -c "set -tISL68127vout -pdev=5555 -pvout=0.8448; run -f -tISL68127vout"
+*** DONE Reboot BF
+** DONE Run MockD
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+* Telegraphs
+** TODO sort devices alphabetically
+   DEADLINE: <2022-11-08 Tue>
+** TODO work to let selects with pre-selected options
+   DEADLINE: <2022-11-08 Tue>
+** TODO add voltages plot
+   DEADLINE: <2022-11-08 Tue>
+** TODO add current plot
+   DEADLINE: <2022-11-08 Tue>
+
+* DONE Fill CCRMS about BF reboot: CCMPR02729075
+DEADLINE: <2022-11-07 Mon>
+* TODO Gather and write usefull information in wiki
+ - [X] How to manually run mockD and *ensure* it will run from the board I want
+   (create file)
+ - [X] How to generate device id (bruno)
+ - [ ] How to create db for hcu customer
+* DONE Generate HCU reports
+DEADLINE: <2022-11-08 Tue>
+** DONE /lan/cva/cs4/FSE/Customers/AMD/PDZ-Report_root_adchwe5_emu_4Nov1131
+** DONE /lan/cva/cs4/FSE/Customers/AMD/PDZ-Report_root_plhwe-emu-am01_4Nov1317
+** DONE /lan/cva/cs4/FSE/Customers/AMD/PDZ-Report_root_adchwe6_emu_4Nov1130
+
+* TODO Test new boards with voltage stress test
+DEADLINE: <2022-11-08 Tue>
+    Hi, Tiago,
+
+    Can you help exercise the following 3 boards the first thing in the morning similar to what we did last week?  You can work on C22 first while Jonathan fixes Sod23.
+
+    SOD22 - JSJ2244F0036 (new SU substrate)
+    SOD23 - JSJ244F039 (new SU substrate)
+    LD 134 - JSJ2244F0037 (Nuvation FFLY)
+
+    A couple power-cycling and MockD shall be sufficient for them.
+
+** TODO SOD22
+** TODO SOD23
+** TODO LD134
+
+* DONE UPDATE 22H1 BRANCH WITH HCU CODE
+
+* TODO Generate HCU reports
+DEADLINE: <2022-11-09 Wed>
+
+** DONE /lan/cva/bldg11_eng/CustomerPDZ/NY/W108L_smd201/PDZ-Report_root_scv-smd201_7Nov0911 
+** DONE /lan/cva/bldg11_eng/CustomerPDZ/NY/Z2-smd202/PDZ-Report_root_scv-smd202_7Nov0912 
+** DONE /lan/cva/bldg11_eng/CustomerPDZ/NY/Z2-smd203/PDZ-Report_root_scv-smd203_7Nov0909 
+
+<2022-11-10 Thu>
+
+* IN-PROGRESS Recover LD1 from 405
+    - [ ] Reboot board to try get it online
+    - [ ] Check board logs to catch reason of error
+
+* TODO Speak with Chris about default values for Telegraphs
+* TODO Check with Leni about my FGTS
+* TODO Run Stress test if possible (bad lanes everywhere on 405, Andrei is working on it)
+* TODO Check Atlassian api code to work with token key

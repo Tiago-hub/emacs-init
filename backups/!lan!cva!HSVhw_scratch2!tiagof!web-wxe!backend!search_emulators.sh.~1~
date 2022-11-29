@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+nmap -sn 10.206.144.0/24 | grep "smd" | awk '{print $5}' | cut -d '.' -f1 > ./config/emulators.json

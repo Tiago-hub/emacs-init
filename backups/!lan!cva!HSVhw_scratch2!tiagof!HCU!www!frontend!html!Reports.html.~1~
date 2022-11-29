@@ -1,0 +1,26 @@
+<h1>Reports generation</h1>
+    <p>
+        Generate reports from data available into hcu database
+    </p>
+    <form action="../php/Reports.php">
+        <p>
+            <label for="start-date">Start date:</label>
+            <input type="datetime-local" id="start-date" name="start-date">
+
+            <label for="end-date">End date:</label>
+            <input type="datetime-local" id="end-date" name="end-date">
+
+            <label for="report-type">Choose a report type:</label>
+
+            <select name="report-type" id="report-type">
+                <option value="lanedetails">Lane Details</option>
+                <option value="sysavail">System Avail</option>
+            </select>
+        </p>
+        <p>
+          <input type="submit" value="Generate">
+        </p>
+    </form>
+    <p>
+        <a href="/" data-link>Return to home</a>.
+    </p>

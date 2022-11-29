@@ -1,0 +1,20 @@
+setenv SDL_IGNORE_VERSION 1
+setenv NO_VERIFY_FILES 1
+setenv DISABLE_HW_DB_CHECK 1
+setenv XE_SUPPRESS_CFIGMGR_CHECK 1
+setenv XE_SUPPRESS_HOST_IB_CHECKS 1
+setenv DISABLE_FAST_DOWNLOAD 1
+setenv DISABLE_SIGNATURE_CHECK 1
+setenv QT_ET3_API_ARGS "-max_cs_writes 1"
+setenv TRACE_MODE LEGACY_FV
+setenv SD_BRINGUP 1
+setenv IB_SIZE 4096
+setenv NO_EPP 1
+# setenv ELLA_DETAILS 2
+# setenv DEBUG_PCS_DUMP_MORE
+# setenv MEASURE_PCS_TX_SOP
+
+setenv AP2_EM_HOST hsv-smd407
+setenv UTH_EMULATOR hsv-smd407
+
+setenv QT_ETNBCS_ARGS '-client -host hsv-smd407 -emul_mode production -sync_mode tci'

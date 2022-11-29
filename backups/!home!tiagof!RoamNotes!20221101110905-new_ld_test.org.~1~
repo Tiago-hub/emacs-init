@@ -1,0 +1,21 @@
+#+title: new-ld-test
+
+* Briefing
+    Folks,
+ 
+    Although we will not upgrade rack-side SW for 405, there are a few exercises
+    requests to conduct.
+
+    The following are the new HW being added at this moment
+
+    JSJ2242F0037 - 9FAI000328 (SD new substrate and new LPDDR) – Placed in LD 135
+    JSJ2242F0036 - 9FAI000328 (SD new substrate and new LPDDR) – Placed in LD 136
+    JSJ2242F0038 - 9FAI000325 (SU new substrate) – Placed in LD 114
+    JSJ2243F0002 - 9FAI000325 (SU new substrate) - on pe-ld10 will be available EOD
+    tomorrow (10/21) – Waiting for Gordon to finish regression on it. 1-2 days
+
+    Tiago: Similar to item#1, can you help exercise these LD board the same way
+    once Bruno done?  (If the voltage does not survive power-cycle, please take the
+    steps from Bruno and make it part of the exercise).  Once we are done with all
+    these exercises, leave the voltage setting active so they can be soaked by
+    other people’s job running.

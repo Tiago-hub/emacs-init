@@ -1,0 +1,127 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : hcu_report_parser.py
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+
+from atlassian import Confluence
+from pyquery import PyQuery
+import sys, os, re
+import optparse
+from datetime import datetime
+
+usage = \
+"""
+Script to generate hcu reports that integrates with wiki page that holds database info
+Usage: %prog [options]
+"""
+p = optparse.OptionParser(usage=usage)
+
+p.add_option("-p",
+             action="store",
+             dest="pdz_path",
+             help="PDZ report root dir")
+
+p.set_defaults(pdz_path=None)
+opts, args = p.parse_args()  # if -h or --help, display help output and exit.
+
+root_dir = opts.pdz_path.split("/")[-1]
+root_dir = [text.strip("_") for text in root_dir.split("root")]
+root_dir = root_dir[-1]
+root_dir = root_dir.split("_")
+root_dir.pop()
+system_id = "_".join(root_dir)
+#print(system_id)
+
+confluence = Confluence(url="https://wiki.cadence.com/confluence", username="tiagof", token="NDc2MTEwNDM2MTU4OgtW7XMYV8Lrv9ETUmA/yORW0eTy")
+
+
+try:
+    page_id=623396069
+    #oficial page_id=518991885
+    page_content = confluence.get_page_by_id(page_id=page_id, expand="body.view")
+    page_body = page_content['body']['view']['value']
+    page_title = page_content['title']
+    pq = PyQuery(page_body)
+
+    table_index = 0
+
+    table = pq("table").eq(table_index)
+    count = 0
+    indexes = {"system id": None, "system name in database": None}
+    for table_head in table.find('th').items():
+        for index2search in indexes.keys():
+            if index2search == table_head.text().lower():
+                indexes[index2search] = count
+        count += 1
+    #print(indexes)
+
+    system_info = {}
+    found = False
+    for table_row in table.find('tr').items():
+        col_count = 0
+        for table_cell in table_row.find('td').items():
+            for col_name, col_number in indexes.items():
+                if col_count == col_number:
+                    system_info[col_name] = table_cell.text().split("\n")
+            col_count += 1
+        if system_info.get("system id") is not None:
+            #print(system_info)
+            if system_id in system_info["system id"]:
+                found = True
+                break
+                # print(system_id, system_info["system id"])
+                # print(system_info)
+    if system_info:
+        system_name_db = system_info["system name in database"][0]
+
+    if not found:
+        raise ValueError("Could not find a system database for given path")
+
+    #print(system_name_db)
+
+    log_dirs = []
+    for root, dirs, files in os.walk(os.path.abspath(os.path.join(opts.pdz_path,"log"))):
+        for dir in dirs:
+            match = re.search('\d{2}-\d{2}-\d{4}', dir)
+            if match:
+                log_date = datetime.strptime(dir,"%m-%d-%Y")
+                log_dirs.append(log_date)
+    log_dirs.sort()
+    start_date = log_dirs[0].strftime("%Y-%m-%d")
+    end_date = log_dirs[-1].strftime("%Y-%m-%d")
+
+    print(system_name_db, opts.pdz_path, start_date, end_date)
+
+
+
+except Exception as e:
+    exception_type, exception_object, exception_traceback = sys.exc_info()
+    filename = exception_traceback.tb_frame.f_code.co_filename
+    line_number = exception_traceback.tb_lineno
+
+    message = f"Exception type: {exception_type} \n"
+    message += f"Exception message: {exception_object} \n"
+    message += f"File name: {filename} \n" 
+    message += f"Line number: {line_number}"
+
+    print(message)

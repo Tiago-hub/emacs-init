@@ -1,0 +1,142 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : install.py
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+
+import os
+import sys
+import subprocess
+import logging
+import paramiko
+import json
+
+
+def config(json_file):
+    """
+    Initial configurations. Config logger and reads info from json file
+    
+    Parameters:
+        json_file (str): Path to json file
+    
+    Returns:
+        config (dict): A dict with relevant info from json file
+    """
+    logging.basicConfig(format='%(asctime)s %(name)s %(levelname)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.DEBUG,
+                        handlers=[
+                            logging.FileHandler("dashboard_install.log"),
+                            logging.StreamHandler()
+                        ])
+
+    paramiko_logger = paramiko.util.logging.getLogger()
+    paramiko_logger.setLevel(logging.WARN)
+
+    with open(json_file) as file:
+        data = json.load(file)
+
+    return data
+
+def search_container():
+    """
+    Search for the docker container ip assuming the default name for it.
+    The default name is hcu_<hostname>
+
+    Parameters:
+        None
+
+    Returns:
+        ip (str): The ip of the docker container
+    """
+    command = ["hostname"]
+    proc = subprocess.run(command, capture_output=True, text=True)
+    hostname = proc.stdout.strip()
+
+    command = ["whoami"]
+    proc = subprocess.run(command, capture_output=True, text=True)
+    user = proc.stdout.strip()
+
+    command = [] if user == "root" else ["sudo"]
+    command += ["docker",
+                "inspect",
+                "-f",
+                "\"{{ .NetworkSettings.IPAddress }}\"",
+                f"hcu_{hostname}"
+                ]
+    proc = subprocess.run(command, capture_output=True, text=True)
+    ip = proc.stdout.strip().strip("\"")
+
+    return ip
+
+class Container:
+
+    def __init__(self, ip, user, password):
+        self.ip = ip
+        self.user = user
+        self.password = password
+        print(ip, user, password)
+
+    def run_command(self, cmd):
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh_client.connect(hostname=self.ip, username=self.user,
+                           password=self.password)
+
+        (stdin, stdout, stderr) = ssh_client.exec_command(cmd)
+        self.stdout = stdout
+        self.exit_code = stdout.channel.recv_exit_status()
+        ssh_client.close()
+
+    def set_required(self, required_dict):
+        self.required_dict = required_dict
+        self.has_required_system = dict((el, False) for el
+                                        in required_dict["linux"])
+        self.has_required_python = dict((el, False) for el
+                                        in required_dict["python"])
+
+    def test_required(self):
+        system_apps = self.required_dict["linux"]
+        python_apps = self.required_dict["python"]
+
+        for app in system_apps:
+            cmd = f"command -v {app}"
+            self.run_command(cmd)
+            if self.exit_code != 0:
+                logging.warn(f"There is no {app} installed.")
+                self.has_required_system[app] = False
+            else:
+                self.has_required_system[app] = True
+
+if __name__ == "__main__":
+    config = config("./config.json")
+    print(config)
+    logging.info("Getting container ip...")
+    container_ip = search_container()
+    print(container_ip)
+    logging.info(f"Container ip is {container_ip}")
+    logging.info("Checking for the required applications on container...")
+    container = Container(ip=container_ip,
+                           user=config["container access"]["user"],
+                           password=config["container access"]["password"])
+    container.set_required(config["required"])
+    container.test_required()

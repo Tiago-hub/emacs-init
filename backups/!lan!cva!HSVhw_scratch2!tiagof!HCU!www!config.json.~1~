@@ -1,0 +1,6 @@
+{
+    "required": {
+        "linux": ["nginx"],
+        "python": ["flask", "flask cors", "gunicorn"]
+    }
+}

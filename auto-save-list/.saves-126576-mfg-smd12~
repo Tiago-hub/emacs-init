@@ -1,0 +1,8 @@
+/ssh:root@172.17.0.2:/etc/nginx/nginx.conf
+/tmp/#!ssh:root@172.17.0.2:!etc!nginx!nginx.conf#
+/ssh:root@172.17.0.2:/root/anaconda-ks.cfg
+/tmp/#!ssh:root@172.17.0.2:!root!anaconda-ks.cfg#
+/home/tiagof/RoamNotes/20220628110903-hcu_web.org
+/home/tiagof/RoamNotes/#20220628110903-hcu_web.org#
+/home/tiagof/RoamNotes/agenda.org
+/home/tiagof/RoamNotes/#agenda.org#

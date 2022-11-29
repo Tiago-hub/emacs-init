@@ -1,0 +1,157 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : wmuop
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+
+import pexpect
+import argparse
+from subprocess import run
+import utils
+import json
+
+
+DESCRIPTION="Script to read/set CL temperature on WMU"
+
+
+class UNIT:
+    """ Handler to operate cooling unit in the rack """
+
+    READ_TEMP_CMD = "mbget -t 127.0.0.1 -T 700 -a 40004 -r 1"
+    WRITE_TEMP_CMD = "mbget -t 127.0.0.1 -T 700 -a 40004 -w "
+    def __init__(self, ip_addr, unit_type):
+        self.ip_addr = ip_addr
+        self.unit_type = unit_type
+        json_file = "./config.json"
+        with open(json_file) as file:
+            config = json.load(file)
+        self.coolant_register = config[unit_type]["registers"]["coolant"]
+        self.golden = config["golden_dumping_paths"][unit_type]
+        self.password = config["ssh_access"][unit_type]
+        self.terminal_regex = config["ssh_terminal"][unit_type]
+
+        self.session = pexpect.spawn(f"ssh -o StrictHostKeyChecking=no -o userknownhostsfile=/dev/null root@{self.ip_addr}")
+        self.session.expect(".*assword: *")
+        self.session.sendline(self.password)
+        self.session.expect(self.terminal_regex)
+
+        if "k" in unit_type.lower():
+            self.coolit = True
+            self.motivair = False
+            self.READ_TEMP_CMD = ("mbget -t 127.0.0.1 -T 700 -a "
+                                f"{self.coolant_register} -r 1")
+            self.WRITE_TEMP_CMD = ("mbget -t 127.0.0.1 -T 700 -a "
+                                f"{self.coolant_register} -w ")
+        elif "m" in unit_type.lower():
+            self.coolit = False
+            self.motivair = True
+            self.READ_TEMP_CMD = ("/mnt/data/customer/cadence/golden/bin/modpoll"
+                                  " -1 -m tcp -r 3 -t 4 -c 1 127.0.0.1")
+            self.WRITE_TEMP_CMD = ("mbget -t 127.0.0.1 -T 700 -a "
+                                f"{self.coolant_register} -w ")
+
+    def read_temp(self):
+        """ Reads the temperature from WKU using the instantiated pexpect
+            session
+        """
+        self.session.sendline(self.READ_TEMP_CMD)
+        self.session.expect(self.terminal_regex)
+        result_raw = self.session.after.decode("utf-8").strip()
+        # I honnestly dont know why but for coolit must use before and for
+        # mootivair must use after to work ;-;
+        print(result_raw)
+        exit()
+        result = result_raw.splitlines()[-2]
+        print(result)
+        exit()
+        result_in_c = int(result.split()[1]) / 10
+        return result_in_c, result
+
+    def write_temp(self, value):
+        """ Writes a new temperature in the WKU CL register """
+        if not 20 <= value <= 40:
+            raise ValueError("Set temperature between 20C and 40C")
+        cmd = self.WRITE_TEMP_CMD + f"{value * 10}"
+        print(f"[INFO] Setting temperature to {value}C (Reg: {value * 10})")
+        print(f"[DEBG] Cmd: '{cmd}'")
+        self.session.sendline(self.WRITE_TEMP_CMD + f"{value * 10}")
+        self.session.expect(self.terminal_regex)
+        result = self.session.before.decode("utf-8").strip()
+        return result
+
+    def close(self):
+        """ Closes the Pexpect session """
+        self.session.sendline("exit")
+
+
+def main():
+    """ Handles command line arguments to either read or set CL temperature """
+    cmd_parse = argparse.ArgumentParser(description=DESCRIPTION)
+    cmd_parse.add_argument("--read",
+                           action="store_true",
+                           default=False,
+                           help="Returns the CL temperature")
+    cmd_parse.add_argument("--set",
+                           default="20C",
+                           help="Set the temperature to the desired value "
+                           "(default 20C)")
+    cmd_parse.add_argument("--addr",
+                           default=None,
+                           help="IP address to the WKU cmd prompt")
+    cmd_parse.add_argument("--unit",
+                           help="Cooling unit type"
+                           "(Example: wku)")
+
+    opts = cmd_parse.parse_args()
+
+    unit_mac = utils.get_unit_mac(opts.unit)
+    if opts.addr is None:
+        if unit_mac is None:
+            print("[ !! ] No WKU BM was found on 'apsm -r'")
+            exit(1)
+        else:
+            try:
+                unit_ip_addr = utils.get_unit_ip(unit_mac)
+            except PermissionError:
+                print("[ !! ] Script need to be executed as root or with sudo")
+                exit(1)
+    else:
+        unit_ip_addr = opts.addr
+
+    unit_handler = UNIT(unit_ip_addr, opts.unit)
+
+    if opts.read:
+        print(f"[    ] Reading temperature from {opts.unit.upper()} at {unit_ip_addr}")
+        temp_read, reg_value = unit_handler.read_temp()
+        print(f"[ OK ] Temperature: {temp_read}C (Reg: {reg_value})")
+    else:
+        if "C" in opts.set.upper():
+            temp = int(opts.set.upper().replace("C", ""))
+        else:
+            temp = int(opts.set)
+        unit_handler.write_temp(temp)
+    unit_handler.close()
+    exit(0)
+
+
+if __name__ == "__main__":
+    main()

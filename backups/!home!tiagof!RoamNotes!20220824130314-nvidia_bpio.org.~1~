@@ -1,0 +1,13 @@
+:PROPERTIES:
+:ID:       6b8c392c-5767-4552-914d-e78c6bc8af76
+:END:
+#+title: nvidia-bpio
+
+A place to keep notes about nvidia bpio debug
+
+* TODO script to read all sensors in board
+    Philip suspects some device temperature drift is affecting
+    capacitance of lanes. A variation of more than 5% ~ 10% can cause a
+    capacitance drift around 20%.
+    The script should scan around time of failure of a lane and collect info
+    from all sensors on board. Then report its temperature drift

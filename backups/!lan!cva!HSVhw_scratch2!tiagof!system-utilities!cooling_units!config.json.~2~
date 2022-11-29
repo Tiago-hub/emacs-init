@@ -1,0 +1,40 @@
+{
+   "wku":{
+      "registers":{
+         "coolant":40004
+      }
+   },
+   "aku":{
+      "registers":{
+         "coolant":40004
+      }
+   },
+   "wmu":{
+      "registers":{
+         "coolant":40003
+      }
+   },
+   "amu":{
+      "registers":{
+         "coolant":40020
+      }
+   },
+   "golden_dumping_paths":{
+      "amu":"/home/brunof/projects/cooling/utils/modbus_dump/golden/amu_red",
+      "wmu":"/home/brunof/projects/cooling/utils/modbus_dump/golden/wmu_red",
+      "wku":"/home/brunof/projects/cooling/utils/modbus_dump/golden/wkuh_red",
+      "aku":"/home/brunof/projects/cooling/utils/modbus_dump/golden/akuh_red"
+   },
+   "ssh_access":{
+      "amu":"froot",
+      "wmu":"froot",
+      "aku":"cadence",
+      "wku":"cadence"
+   },
+   "ssh_terminal":{
+      "amu":".*~]# *",
+      "wmu":".*~]# *",
+      "wku":"dclc:~# *",
+      "aku":"dclc:~# *"
+   }
+}

@@ -1,0 +1,13 @@
+Week objectives
+
+?	HCU
+o	Start to work with new options in regular features:
+?	Add new reports options: Markouts, Telemetry
+?	Add new plots to Telegraphs: Voltages, Currents
+o	Include option to select a database different than the default in report generation web page
+?	Improvement to pdz reports generation
+o	Work into feature to auto update wiki table after report generation
+?	Emulators:
+o	Aid in emulators recovery/wxe installation, etc.
+
+<2022-11-28 Mon>

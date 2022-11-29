@@ -1,0 +1,861 @@
+                            ━━━━━━━━━━━━━━━━
+                              NEW-LD-TEST
+
+                             Tiago Ferreira
+                            ━━━━━━━━━━━━━━━━
+
+
+Table of Contents
+─────────────────
+
+1. Briefing
+2. Initial considerations
+3. Step by step:
+.. 1. DONE reboot LD using xeDiags
+.. 2. DONE run mockD only for those boards
+..... 1. Compile mockD for board 114
+..... 2. Run mockD for board 114
+..... 3. TODO Check for errors
+..... 4. Results:
+.. 3. STARTED Run stress test
+..... 1. DONE Lower 5% for several rails (including DIMMs 1.2V nominal)
+..... 2. DONE Lower 4% for Sd SerDesCore (0.88V nominal):
+..... 3. DONE Reboot BF
+.. 4. TODO Run MockD
+..... 1. DONE Compile
+..... 2. DONE Run
+
+
+
+
+
+1 Briefing
+══════════
+
+  Folks,
+
+  Although we will not upgrade rack-side SW for 405, there are a few
+  exercises requests to conduct.
+
+  The following are the new HW being added at this moment
+
+  JSJ2242F0037 - 9FAI000328 (SD new substrate and new LPDDR) – Placed in
+  LD 135 JSJ2242F0036 - 9FAI000328 (SD new substrate and new LPDDR) –
+  Placed in LD 136 JSJ2242F0038 - 9FAI000325 (SU new substrate) – Placed
+  in LD 114 JSJ2243F0002 - 9FAI000325 (SU new substrate) - on pe-ld10
+  will be available EOD tomorrow (10/21) – Waiting for Gordon to finish
+  regression on it. 1-2 days
+
+  Tiago: Similar to item#1, can you help exercise these LD board the
+  same way once Bruno done?  (If the voltage does not survive
+  power-cycle, please take the steps from Bruno and make it part of the
+  exercise).  Once we are done with all these exercises, leave the
+  voltage setting active so they can be soaked by other people’s job
+  running.
+
+
+2 Initial considerations
+════════════════════════
+
+  Due problems with SOD22, only LD 114 will be tested first. The others
+  two will begin test after Jonathan replace the SOD.
+
+
+3 Step by step:
+═══════════════
+
+3.1 DONE reboot LD using xeDiags
+────────────────────────────────
+
+  • State "DONE" from "WAITING" [2022-11-03 Thu 12:18]
+  • State "WAITING" from "STARTED" [2022-11-03 Thu 11:42]
+  • State "STARTED" from "TODO" [2022-11-03 Thu 11:50] $ xeDiags -run
+    reinitld 114 00 ET7DIAGS | [11-03-2022 11:50:32] reinitld command
+    for board 114 PASSED
+    • Waiting for board to trainning
+
+
+3.2 DONE run mockD only for those boards
+────────────────────────────────────────
+
+  • State "DONE" from "WAITING" [2022-11-03 Thu 13:21]
+  • State "STARTED" from "TODO" [2022-11-03 Thu 12:18]
+
+
+3.2.1 Compile mockD for board 114
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  [tiagof@hsv-smd405 1D_smd405]$ ../compile 1 hsv-smd405 114 imem
+  Compiling a design with 1 domains of content Host: hsv-smd405
+  Compiling for Internal Memory Boards: 114 …  INFO (dbgPrep-1052):
+  dbgPrepare done.  *** dbgPrepare PASSED *** compileFind finished
+  (Elapsed time: 00:01:23)
+
+
+3.2.2 Run mockD for board 114
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  [tiagof@hsv-smd405 1D_smd405]$ ../run hsv-smd405 xeDebug - 22H1_WXE,
+  V22.04.150.a002
+
+  (c) 1991-2021 Cadence Design Systems, Inc. All rights reserved
+  worldwide.  See files in <rootdir>/share/vxe/install/Copyrights
+  WARNING (legacy-52177): There is no remote shell in your path.  Check
+  the value of XE_SECURE_CONNECTION and your OS environment.  XE> source
+  ../ple_timer.tcl XE> xeset retryDownload 2000 2000 XE> xeset
+  retryInterval 30 30 XE> XE> ple_timer -start debug INFO: ple_timer #1
+  debug started XE> debug .  XE> ple_timer -stop debug INFO: ple_timer
+  -stop debug = 1016 ms XE> XE> ple_timer -start host INFO: ple_timer #2
+  host started XE> if {$argc == 1} { host [lindex $argv 0] -dbe .  }
+  else { host .  } INFO (legacy-0): Opening Reduced PDB…  INFO
+  (legacy-39111): Opening PDB iceMock mockTop (of=8).  INFO (legacy-0):
+  27064 critical net names have been restored: elapsed time 0 sec INFO
+  (legacy-0): strtab has been restored: elapsed time 0 sec INFO
+  (legacy-0): 1109 cells have been restored: elapsed time 0 sec INFO
+  (legacy-0): 1 smTrPrims have been restored: elapsed time 0 sec INFO
+  (legacy-0): 2090827 smTrNets have been restored: elapsed time 0 sec
+  INFO (legacy-0): sigmap has been restored: elapsed time 0 sec INFO
+  (legacy-0): flat-conns have been restored: elapsed time 0 sec INFO
+  (legacy-0): 4103782 synonyms have been setup: elapsed time 0 sec INFO
+  (legacy-0): smNetIDs have been setup: elapsed time 1 sec INFO
+  (legacy-0): CRT-FULL has been restored: elapsed time 0 sec INFO
+  (legacy-51751): Setting emulator to hsv-smd405 from host
+  command. DBEngine host is hsv-smd405.  WARNING (legacy-52174):
+  Attempting to run on configmgr host hsv-smd405.  INFO (legacy-51578):
+  Opened xeConnect port 41032 on host hsv-smd405 (10.206.176.55) for
+  xeDebug process 293926.  DBEngine - 22H1_WXE, V22.04.150.a002
+
+  INFO (legacy-47055): Running in design directory:
+  '/home/tiagof/temp/test_new_ld/mockD/newMockDsA2/1D_smd405'
+  [sertop_get_lane_status]: 392 lane(s) requested Found sertop at
+  0x0001694B caller_nodeid=0x00000000 sertop_nodeid=0x0001694B Received
+  392 lanes from sertop.  XE> ple_timer -stop host INFO: ple_timer -stop
+  host = 15902 ms XE> XE> ple_timer -start download INFO: ple_timer #3
+  download started XE> download INFO (legacy-44626): PXP_Z2: Acquired
+  'Palladium_Z2_Domain' license, version '22.0'.  [sertop_set_monitor]:
+  392 lane(s) requested caller_nodeid=0x00000000
+  sertop_nodeid=0x0001694B Received 392 lanes from sertop.
+  [sertop_set_monitor]: 392 lane(s) requested caller_nodeid=0x00000000
+  sertop_nodeid=0x0001694B Received 392 lanes from sertop.  INFO
+  (legacy-50779): Download Info: boards 0 DOWNLOADED XE> ple_timer -stop
+  download INFO: ple_timer -stop download = 3289 ms XE> configPM -stb
+  XE> XE> hdlConfig initatb.qel INFO (legacy-48003): Starts automatic
+  initialization with 'initatb.qel'.  INFO (legacy-48020): It took 0
+  seconds to source qel file.  INFO (legacy-48021): It took 0 seconds to
+  build ATB data.  INFO (legacy-48023): It took 0 seconds to force 1
+  nets and initialize memories.  INFO (legacy-48027): It took 0 seconds
+  to create symbol for 15 trigger nets.  INFO (legacy-48004): Finishes
+  automatic initialization.  XE> xeset traceMemMax 24612928 fclk XE>
+  xeset traceMemSize 10000 10000 fclk XE> database -open traceMockTop
+  WARNING (legacy-49579): Multiple host for fullvision is not
+  setup. Waveform generation performance will be slower since only local
+  host is doing the computation. Use 'xeset mtHost' command or set
+  environment variable CDN_MT_HOST or edit computeFarm.json to setup
+  multiple host.  WARNING (legacy-54971): TDB_EXPORT is not set. When
+  running batch SST2/FSDB and VWDB, disable typeDB mode and go through
+  ConstructInfoFile-based flow for waveform display.  INFO
+  (legacy-51416): Opening waveform database with timeUnit=fclk. Waveform
+  display will show a fixed 1ns for each FCLK cycle instead of actual
+  simulation time.  XE> probe -create -errorok mon INFO (legacy-49430):
+  addinst: 47 new nets are added.  Created probe x1 XE> probe -create
+  -errorok u1.finalOut u1.fout0 u1.fout1 u1.fout2 u1.fout3 u1.fout4
+  u1.fout5 u1.fout6 u1.fout7 u1.fout8 u1.fout9 u1.foutA u1.foutB
+  u1.foutC u1.foutD INFO (legacy-49430): Add probe: 300 new nets are
+  added.  Created probe x2 XE> probe -create -errorok u1 -depth 2 INFO
+  (legacy-49430): addinst: 33236 new nets are added.  Created probe x3
+  XE> XE> run 640 INFO (legacy-48966): None of -wait/-nowait options
+  were specified. Using default for STB mode (-wait). This message will
+  not be repeated.  XE> ple_timer -start forces INFO: ple_timer #4
+  forces started XE> signal -force in1 "0000000000"; Warning: use of
+  signal command is deprecated. Use value, deposit, force, release
+  commands instead.  XE> signal -force in2 "1010101010"; XE> signal
+  -force in3 "0000000000"; XE> signal -force in4 "0101010101"; XE>
+  signal -force in5 "0000000000"; XE> signal -force in6 "1010101010";
+  XE> signal -force in7 "0000000000"; XE> signal -force in8
+  "0101010101"; XE> signal -force in9 "0000000000"; XE> signal -force
+  in10 "1010101010"; XE> signal -force in11 "0000000000"; XE> signal
+  -force in12 "0101010101"; XE> signal -force in13 "0000000000"; XE>
+  signal -force in14 "1010101010"; XE> signal -force in15 "0000000000";
+  XE> signal -force in16 "0101010101"; XE> signal -force in17
+  "0000000000"; XE> signal -force in18 "1010101010"; XE> signal -force
+  in19 "0000000000"; XE> signal -force in20 "0101010101"; XE> ple_timer
+  -stop forces INFO: ple_timer -stop forces = 70 ms XE> XE> run 40000
+  XE> signal -force monEn 1 XE> run 40 Time 40641 Value
+  00000000000000000000 11010000111000000110 Time 40643 Value
+  00000000000000000000 00100001000000001101 Time 40645 Value
+  00000000000000000000 01001011110101110001 Time 40647 Value
+  00000000000000000000 10100100101011100010 Time 40649 Value
+  00000000000000000000 00001111000001101010 Time 40651 Value
+  00000000000000000000 10010010111110001011 Time 40653 Value
+  00000000000000000000 10001000100011110000 Time 40655 Value
+  00000000000000000000 01000001001101010101 Time 40657 Value
+  00000000000000000000 11110000001010101010 Time 40659 Value
+  00000000000000000000 00000100110101010100 Time 40661 Value
+  00000000000000000000 11000000111010101000 Time 40663 Value
+  00000000000000000000 10111111111010010101 Time 40665 Value
+  00000000000000000000 01001001000111001010 Time 40667 Value
+  00000000000000000000 01001101000101000011 Time 40669 Value
+  00000000000000000000 00100100011100101001 Time 40671 Value
+  00000000000000000000 11110101101111000101 Time 40673 Value
+  00000000000000000000 10010001110010100110 Time 40675 Value
+  00000000000000000000 11011110110101001101 Time 40677 Value
+  00000000000000000000 10110101111000101100 Time 40679 Value
+  00000000000000000000 01111011000100110111 XE> signal -force monEn 0
+  XE> XE> ple_timer -start bigrun INFO: ple_timer #5 bigrun started XE>
+  run 80000000 XE> ple_timer -stop bigrun INFO: ple_timer -stop bigrun =
+  25390 ms XE> XE> signal -force monEn 1 XE> run 40 Time 80040681 Value
+  00000000000000000000 01100001101011011011 Time 80040683 Value
+  00000000000000000000 11010110100100000110 Time 80040685 Value
+  00000000000000000000 10000110111101101110 Time 80040687 Value
+  00000000000000000000 01010001110001011001 Time 80040689 Value
+  00000000000000000000 00011011100110111000 Time 80040691 Value
+  00000000000000000000 01101001010001100111 Time 80040693 Value
+  00000000000000000000 11101111010011001110 Time 80040695 Value
+  00000000000000000000 10100101010110011101 Time 80040697 Value
+  00000000000000000000 10111101011100111011 Time 80040699 Value
+  00000000000000000000 00011011011100010110 Time 80040701 Value
+  00000000000000000000 11100010101000101100 Time 80040703 Value
+  00000000000000000000 01101101100001011001 Time 80040705 Value
+  00000000000000000000 10001010100010110011 Time 80040707 Value
+  00000000000000000000 01010111001101101010 Time 80040709 Value
+  00000000000000000000 00101010011011001111 Time 80040711 Value
+  00000000000000000000 01010101011001001011 Time 80040713 Value
+  00000000000000000000 10100001110010010111 Time 80040715 Value
+  00000000000000000000 01100100011001111111 Time 80040717 Value
+  00000000000000000000 10010111011001011101 Time 80040719 Value
+  00000000000000000000 10010001110111111100 XE> signal -force monEn 0
+  XE> XE> ple_timer -start prepOff INFO: ple_timer #6 prepOff started
+  XE> # Use with FV XE> # database -prepareoffline XE> # Use with DYNP
+  XE> database -upload WARNING (legacy-49579): Multiple host for
+  fullvision is not setup. Waveform generation performance will be
+  slower since only local host is doing the computation. Use 'xeset
+  mtHost' command or set environment variable CDN_MT_HOST or edit
+  computeFarm.json to setup multiple host.  WARNING (legacy-54211): You
+  are not using batch mode to generate waveform for large number of
+  signals. The performance will be slow. To get better performance
+  please use batch mode by using "-batch" option in "database -open"
+  command in offline mode.  INFO (legacy-54200): Waveform generation
+  done.  XE> ple_timer -stop prepOff INFO: ple_timer -stop prepOff =
+  11626 ms XE> XE> ple_timer -start memdump INFO: ple_timer #7 memdump
+  started XE> memory -dump u1.u0.ram.mem -file mem.out -start 65000 -end
+  0 INFO (legacy-47117): File format is not specified. Use PD HEX format
+  as default.  XE> ple_timer -stop memdump INFO: ple_timer -stop memdump
+  = 15 ms XE> ple_write_timers INFO: writing times and values to
+  ple_timer_report INFO: ple_timer #01 debug=1016 INFO: ple_timer #02
+  host=15902 INFO: ple_timer #03 download=3289 INFO: ple_timer #04
+  forces=70 INFO: ple_timer #05 bigrun=25390 INFO: ple_timer #06
+  prepOff=11626 INFO: ple_timer #07 memdump=15 XE> XE> XE> xeset
+  signalRadix hex hex XE> # Address 15837 (hex 3ddd) should have 924fb
+  after running this specific test XE> # This will vary if the test more
+  or fewer cycles because the memory is XE> # recycled.  XE> memory
+  -value %h u1.u0.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u1.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u2.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u3.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u4.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u5.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u6.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u7.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u8.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.u9.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.uA.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.uB.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.uC.ram.mem[15837] 20'h924fb XE> memory -value %h
+  u1.uD.ram.mem[15837] 20'h924fb XE> XE> quit INFO (legacy-44635):
+  Checking in all checked-out licenses.  INFO (legacy-44635): PXP_Z2:
+  Checking in 'Palladium_Z2_Domain' license.  WARNING (legacy-54241):
+  The workstation was running low on memory (free memory dropped to 1
+  GB), therefore the performance might be impacted.  Differences follow:
+  PASS
+
+
+3.2.3 TODO Check for errors
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+
+3.2.4 Results:
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  MockD ran sucessfully.  Checking for logs did not show any unusual
+  behaviour
+
+
+3.3 STARTED Run stress test
+───────────────────────────
+
+  • State "STARTED" from "TODO" [2022-11-03 Thu 13:21]
+
+
+3.3.1 DONE Lower 5% for several rails (including DIMMs 1.2V nominal)
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  • State "DONE" from "WAITING" [2022-11-03 Thu 13:21]
+    /et3mach/HW_DIAG/ld/diag -m <host> -d <bdevid> -c "set -tvmar1
+    -pvmargin=1; run -f -tvmar1"
+
+
+◊ 3.3.1.1 Results:
+
+  (2022-11-03 13:06:07) tiagof@hsv-smd405 in ~/…/test_new_ld/mockD λ $
+  /et3mach/HW_DIAG/ld/diag -m localhost -d 0x5610000000000 -c "set
+  -tvmar1 -pvmargin=1; run -f -tvmar1"
+
+  Apollo2 LD Diag Initialization Diag port: localhost Target
+  DevID=5610000000000 Initialize Diag channel communication to localhost
+  with BMID=5610000000000 configmgr_host is "localhost" getaddrinfo() rc
+  is 0 Addr as num: 0100007F NOTE: Requires ConfigMgr with API version 2
+  or later starting from WXE041 Connecting to configmgr at:
+  8191@localhost INFO: Registering node API INFO: Registering resolved
+  self with configmgr at 1312@localhost Calling get_nodeids() to find
+  APSM NodeID Success; rc from get_nodeids() is 0 APSM NodeID is
+  00010004 Success; rc from Node_Ping(00010004) is 0 List of discovered
+  BM: BM ID: 5710500000000 BoardType:5 Rack:7 Cluster: 1 Slot: 5 BM ID:
+  5710400000000 BoardType:5 Rack:7 Cluster: 1 Slot: 4 BM ID:
+  5710300000000 BoardType:5 Rack:7 Cluster: 1 Slot: 3 BM ID:
+  42200100000000 BoardType:42 Rack:2 Cluster: 0 Slot: 1 BM ID:
+  42200000000000 BoardType:42 Rack:2 Cluster: 0 Slot: 0 BM ID:
+  42200300000000 BoardType:42 Rack:2 Cluster: 0 Slot: 3 BM ID:
+  42500100000000 BoardType:42 Rack:5 Cluster: 0 Slot: 1 BM ID:
+  42500300000000 BoardType:42 Rack:5 Cluster: 0 Slot: 3 BM ID:
+  42520000000000 BoardType:42 Rack:5 Cluster: 2 Slot: 0 BM ID:
+  42500500000000 BoardType:42 Rack:5 Cluster: 0 Slot: 5 BM ID:
+  42500000000000 BoardType:42 Rack:5 Cluster: 0 Slot: 0 BM ID:
+  42520100000000 BoardType:42 Rack:5 Cluster: 2 Slot: 1 BM ID:
+  44510000000000 BoardType:44 Rack:5 Cluster: 1 Slot: 0 BM ID:
+  44500000000000 BoardType:44 Rack:5 Cluster: 0 Slot: 0 BM ID:
+  44520000000000 BoardType:44 Rack:5 Cluster: 2 Slot: 0 BM ID:
+  42000200000000 BoardType:42 Rack:0 Cluster: 0 Slot: 2 BM ID:
+  42010000000000 BoardType:42 Rack:0 Cluster: 1 Slot: 0 BM ID:
+  5500100000000 BoardType:5 Rack:5 Cluster: 0 Slot: 1 BM ID:
+  42110400000000 BoardType:42 Rack:1 Cluster: 1 Slot: 4 BM ID:
+  5520200000000 BoardType:5 Rack:5 Cluster: 2 Slot: 2 BM ID:
+  42300400000000 BoardType:42 Rack:3 Cluster: 0 Slot: 4 BM ID:
+  44000000000000 BoardType:44 Rack:0 Cluster: 0 Slot: 0 BM ID:
+  42000000000000 BoardType:42 Rack:0 Cluster: 0 Slot: 0 BM ID:
+  42110300000000 BoardType:42 Rack:1 Cluster: 1 Slot: 3 BM ID:
+  42720000000000 BoardType:42 Rack:7 Cluster: 2 Slot: 0 BM ID:
+  42100100000000 BoardType:42 Rack:1 Cluster: 0 Slot: 1 BM ID:
+  42000500000000 BoardType:42 Rack:0 Cluster: 0 Slot: 5 BM ID:
+  42220000000000 BoardType:42 Rack:2 Cluster: 2 Slot: 0 BM ID:
+  44200000000000 BoardType:44 Rack:2 Cluster: 0 Slot: 0 BM ID:
+  44720000000000 BoardType:44 Rack:7 Cluster: 2 Slot: 0 BM ID:
+  42310300000000 BoardType:42 Rack:3 Cluster: 1 Slot: 3 BM ID:
+  42400500000000 BoardType:42 Rack:4 Cluster: 0 Slot: 5 BM ID:
+  42320000000000 BoardType:42 Rack:3 Cluster: 2 Slot: 0 BM ID:
+  42210100000000 BoardType:42 Rack:2 Cluster: 1 Slot: 1 BM ID:
+  5510400000000 BoardType:5 Rack:5 Cluster: 1 Slot: 4 BM ID:
+  5510200000000 BoardType:5 Rack:5 Cluster: 1 Slot: 2 BM ID:
+  42000100000000 BoardType:42 Rack:0 Cluster: 0 Slot: 1 BM ID:
+  44620000000000 BoardType:44 Rack:6 Cluster: 2 Slot: 0 BM ID:
+  42410200000000 BoardType:42 Rack:4 Cluster: 1 Slot: 2 BM ID:
+  42100000000000 BoardType:42 Rack:1 Cluster: 0 Slot: 0 BM ID:
+  42000300000000 BoardType:42 Rack:0 Cluster: 0 Slot: 3 BM ID:
+  42020300000000 BoardType:42 Rack:0 Cluster: 2 Slot: 3 BM ID:
+  42020500000000 BoardType:42 Rack:0 Cluster: 2 Slot: 5 BM ID:
+  42020000000000 BoardType:42 Rack:0 Cluster: 2 Slot: 0 BM ID:
+  42020400000000 BoardType:42 Rack:0 Cluster: 2 Slot: 4 BM ID:
+  42020100000000 BoardType:42 Rack:0 Cluster: 2 Slot: 1 BM ID:
+  42020200000000 BoardType:42 Rack:0 Cluster: 2 Slot: 2 BM ID:
+  44020000000000 BoardType:44 Rack:0 Cluster: 2 Slot: 0 BM ID:
+  42000400000000 BoardType:42 Rack:0 Cluster: 0 Slot: 4 BM ID:
+  7610000000000 BoardType:7 Rack:6 Cluster: 1 Slot: 0 BM ID:
+  5620200000000 BoardType:5 Rack:6 Cluster: 2 Slot: 2 BM ID:
+  5610300000000 BoardType:5 Rack:6 Cluster: 1 Slot: 3 BM ID:
+  5610000000000 BoardType:5 Rack:6 Cluster: 1 Slot: 0 Found BMID:
+  5610000000000 BM interface version : host 24439 / remote 24439 BM
+  image info: SVN version 1.6.11.1 - Built at Sep 8 2022 18:34:45
+
+  BM Version: 1.6.11.1 / Required Baseline: 1.0.25.3 CpuId: 003E002A
+  58535013 20363458 BM reports boardType=5
+
+  BM Telemetry is disable (previous stage = 1)
+
+  Opening DEV_LD devices in slot 0 …  Opening DEV_LD id=0 …  Opening
+  DEV_DUART id=0 …  Opening DEV_PWRONSEQ id=0 …  Opening DEV_BMADC id=0
+  …  Opening DEV_BCM53202 id=0 …  Opening DEV_PHY id=0 …  Opening
+  DEV_BMJTAG_MASTER id=0 …  Opening DEV_BMQSPIFLASH id=0 …  Opening
+  DEV_LM5066 id=0 …  Opening DEV_SI534X id=0 …  Opening DEV_ISL8273 id=0
+  …  Opening DEV_ZL9010 id=0 …  Opening DEV_ADM1293 id=0 …  Opening
+  DEV_0RQP_XOS10B id=0 …  Opening DEV_ISL68127 id=0 …  Opening
+  DEV_TCA6416 id=0 …  Opening DEV_TCA9535 id=0 …  Opening DEV_PCA9539
+  id=0 …  Opening DEV_MAX31790 id=0 …  Opening DEV_TMP421 id=0 …
+  Opening DEV_TLC5910 id=0 …  Opening DEV_MC24AA025 id=0 …  Opening
+  DEV_SPD id=0 …  Opening DEV_FIREFLY id=0 …  Opening DEV_SHUFFLE id=0 …
+  Opening DEV_LD_TCI id=0 …  Opening DEV_SU id=0 …  Opening DEV_SYS id=0
+  …  Opening DEV_SD id=0 …  Opening DEV_BF id=0 …  Opening DEV_I2C_UTIL
+  id=0 …  Opening DEV_GPIO_UTIL id=0 …  Opening DEV_TELEMETRY_UTIL id=0
+  …  Opening DEV_ENH_DIAG id=0 …  ipcPort = 5076
+
+  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+  LD Offline Diagnostics Release 1.10.0 LD_MFG_DIAG Dated 09/12/22
+  16:19:49 GMT Compiled by ** trana [trana_ap2rel] ** Build path:
+  /grid/cva/p4_05/trana/ap2rel/diag/ld Build host: bw-8 Build server:
+  Linux bw-8 2.6.32-642.el6.x86_64 #1 SMP Wed Apr 13 00:51:26 EDT 2016
+  x86_64 x86_64 x86_64 GNU/Linux
+  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+  set -tvmar1 -pvmargin=1; run -f -tvmar1 LD-0: Running VMAR1 Test
+  {ISL827X2} -> 1 INFO: Retimer configuration code=ff ISL8270 (U20E,
+  dbmap 0x00000001) V1P1_COM_L voltage margin LOW 5% (op=0x94)…  BEFORE
+  Vmargin: VOUT = 1.106V (raw=0x2367) AFTER Vmargin: VOUT = 1.048V
+  (raw=0x218B) DIFFER from Vnominal = 0.052V (-4.73% - range
+  [1.023V:1.067V]) : PASS
+
+  ISL8270 (U22E, dbmap 0x00000002) V1P1_COM_R voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 1.108V (raw=0x2378) AFTER Vmargin:
+  VOUT = 1.052V (raw=0x21A9) DIFFER from Vnominal = 0.048V (-4.45% -
+  range [1.023V:1.067V]) : PASS
+
+  ISL8270 (U11E, dbmap 0x00000004) V1P5_COM_L voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 1.509V (raw=0x3048) AFTER Vmargin:
+  VOUT = 1.432V (raw=0x2DD4) DIFFER from Vnominal = 0.068V (-4.53% -
+  range [1.395V:1.455V]) : PASS
+
+  ISL8270 (U21E, dbmap 0x00000008) V1P5_COM_R voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 1.496V (raw=0x2FE3) AFTER Vmargin:
+  VOUT = 1.427V (raw=0x2DA6) DIFFER from Vnominal = 0.073V (-4.93% -
+  range [1.395V:1.455V]) : PASS
+
+  ISL8271 (U2P0, dbmap 0x00000010) V0P8S_SWQ0 voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 0.885V (raw=0x1C55) AFTER Vmargin:
+  VOUT = 0.840V (raw=0x1AE1) DIFFER from Vnominal = 0.040V (-4.55% -
+  range [0.818V:0.854V]) : PASS
+
+  ISL8271 (U2P1, dbmap 0x00000020) V0P8S_SWQ1 voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 0.883V (raw=0x1C41) AFTER Vmargin:
+  VOUT = 0.840V (raw=0x1AE1) DIFFER from Vnominal = 0.040V (-4.55% -
+  range [0.818V:0.854V]) : PASS
+
+  ISL8271 (U1PL, dbmap 0x00000040) V1P8_RTL voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 1.807V (raw=0x39D5) AFTER Vmargin:
+  VOUT = 1.719V (raw=0x3706) DIFFER from Vnominal = 0.081V (-4.45% -
+  range [1.674V:1.746V]) : PASS
+
+  ISL8271 (U1PR, dbmap 0x00000080) V1P8_RTR voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 1.806V (raw=0x39C9) AFTER Vmargin:
+  VOUT = 1.718V (raw=0x36F9) DIFFER from Vnominal = 0.082V (-4.56% -
+  range [1.674V:1.746V]) : PASS
+
+  ISL8272 (U12E, dbmap 0x00000100) V1P2_COM_L voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 1.203V (raw=0x267F) AFTER Vmargin:
+  VOUT = 1.143V (raw=0x2491) DIFFER from Vnominal = 0.057V (-4.83% -
+  range [1.116V:1.164V]) : PASS
+
+  ISL8272 (U17E, dbmap 0x00000200) V1P2_COM_R voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 1.199V (raw=0x265D) AFTER Vmargin:
+  VOUT = 1.140V (raw=0x247A) DIFFER from Vnominal = 0.060V (-5.08% -
+  range [1.116V:1.164V]) : PASS
+
+  ISL8272 (U10E, dbmap 0x00000400) V3P3_COM_1 voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 3.296V (raw=0x6977) AFTER Vmargin:
+  VOUT = 3.129V (raw=0x6420) DIFFER from Vnominal = 0.171V (-5.18% -
+  range [3.069V:3.201V]) : PASS
+
+  ISL8273 (U1P0, dbmap 0x00000800) V0P8C_SWQ0 voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 0.801V (raw=0x19A2) AFTER Vmargin:
+  VOUT = 0.760V (raw=0x1855) DIFFER from Vnominal = 0.040V (-5.00% -
+  range [0.744V:0.776V]) : PASS
+
+  ISL8273 (U1P1, dbmap 0x00001000) V0P8C_SWQ1 voltage margin LOW 5%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 0.801V (raw=0x199F) AFTER Vmargin:
+  VOUT = 0.760V (raw=0x184F) DIFFER from Vnominal = 0.040V (-5.12% -
+  range [0.744V:0.776V]) : PASS
+
+  ISL8273 (U9H, dbmap 0x00002000) VCORE_BFH voltage margin LOW 3%
+  (op=0x94)…  BEFORE Vmargin: VOUT = 0.949V (raw=0x1E5E) AFTER Vmargin:
+  VOUT = 0.921V (raw=0x1D7B) DIFFER from Vnominal = 0.029V (-2.95% -
+  range [0.902V:0.940V]) : PASS
+
+  LD-0: VMAR1 - ISL827x Voltage Margin {ISL827X2} Completed Successfully
+  -> 1 RUN ALL TESTS COMPLETED [LD] 0>2% WARNING: OFFLINE HWDIAGS is
+  destructive …  Please reinitialize your system accordingly before
+  resuming normal operation
+
+
+3.3.2 DONE Lower 4% for Sd SerDesCore (0.88V nominal):
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  • State "DONE" from "WAITING" [2022-11-03 Thu 13:21]
+    /et3mach/HW_DIAG/ld/diag -m <host> -d <bdevid> -c "set
+    -tISL68127vout -pdev=5555 -pvout=0.8448; run -f -tISL68127vout"
+
+
+◊ 3.3.2.1 Results:
+
+  (2022-11-03 13:18:26) tiagof@hsv-smd405 in ~/…/test_new_ld/mockD λ $
+  /et3mach/HW_DIAG/ld/diag -m localhost -d 0x5610000000000 -c "set
+  -tISL68127vout -pdev=5555 -pvout= > 0.8448; run -f -tISL68127vout"
+
+  Apollo2 LD Diag Initialization Diag port: localhost Target
+  DevID=5610000000000 Initialize Diag channel communication to localhost
+  with BMID=5610000000000 configmgr_host is "localhost" getaddrinfo() rc
+  is 0 Addr as num: 0100007F NOTE: Requires ConfigMgr with API version 2
+  or later starting from WXE041 Connecting to configmgr at:
+  8191@localhost INFO: Registering node API INFO: Registering resolved
+  self with configmgr at 1312@localhost Calling get_nodeids() to find
+  APSM NodeID Success; rc from get_nodeids() is 0 APSM NodeID is
+  00010004 Success; rc from Node_Ping(00010004) is 0 List of discovered
+  BM: BM ID: 5710500000000 BoardType:5 Rack:7 Cluster: 1 Slot: 5 BM ID:
+  5710400000000 BoardType:5 Rack:7 Cluster: 1 Slot: 4 BM ID:
+  5710300000000 BoardType:5 Rack:7 Cluster: 1 Slot: 3 BM ID:
+  42200100000000 BoardType:42 Rack:2 Cluster: 0 Slot: 1 BM ID:
+  42200000000000 BoardType:42 Rack:2 Cluster: 0 Slot: 0 BM ID:
+  42200300000000 BoardType:42 Rack:2 Cluster: 0 Slot: 3 BM ID:
+  42500100000000 BoardType:42 Rack:5 Cluster: 0 Slot: 1 BM ID:
+  42500300000000 BoardType:42 Rack:5 Cluster: 0 Slot: 3 BM ID:
+  42520000000000 BoardType:42 Rack:5 Cluster: 2 Slot: 0 BM ID:
+  42500500000000 BoardType:42 Rack:5 Cluster: 0 Slot: 5 BM ID:
+  42500000000000 BoardType:42 Rack:5 Cluster: 0 Slot: 0 BM ID:
+  42520100000000 BoardType:42 Rack:5 Cluster: 2 Slot: 1 BM ID:
+  44510000000000 BoardType:44 Rack:5 Cluster: 1 Slot: 0 BM ID:
+  44500000000000 BoardType:44 Rack:5 Cluster: 0 Slot: 0 BM ID:
+  44520000000000 BoardType:44 Rack:5 Cluster: 2 Slot: 0 BM ID:
+  42000200000000 BoardType:42 Rack:0 Cluster: 0 Slot: 2 BM ID:
+  42010000000000 BoardType:42 Rack:0 Cluster: 1 Slot: 0 BM ID:
+  5500100000000 BoardType:5 Rack:5 Cluster: 0 Slot: 1 BM ID:
+  42110400000000 BoardType:42 Rack:1 Cluster: 1 Slot: 4 BM ID:
+  5520200000000 BoardType:5 Rack:5 Cluster: 2 Slot: 2 BM ID:
+  42300400000000 BoardType:42 Rack:3 Cluster: 0 Slot: 4 BM ID:
+  44000000000000 BoardType:44 Rack:0 Cluster: 0 Slot: 0 BM ID:
+  42000000000000 BoardType:42 Rack:0 Cluster: 0 Slot: 0 BM ID:
+  42110300000000 BoardType:42 Rack:1 Cluster: 1 Slot: 3 BM ID:
+  42720000000000 BoardType:42 Rack:7 Cluster: 2 Slot: 0 BM ID:
+  42100100000000 BoardType:42 Rack:1 Cluster: 0 Slot: 1 BM ID:
+  42000500000000 BoardType:42 Rack:0 Cluster: 0 Slot: 5 BM ID:
+  42220000000000 BoardType:42 Rack:2 Cluster: 2 Slot: 0 BM ID:
+  44200000000000 BoardType:44 Rack:2 Cluster: 0 Slot: 0 BM ID:
+  44720000000000 BoardType:44 Rack:7 Cluster: 2 Slot: 0 BM ID:
+  42310300000000 BoardType:42 Rack:3 Cluster: 1 Slot: 3 BM ID:
+  42400500000000 BoardType:42 Rack:4 Cluster: 0 Slot: 5 BM ID:
+  42320000000000 BoardType:42 Rack:3 Cluster: 2 Slot: 0 BM ID:
+  42210100000000 BoardType:42 Rack:2 Cluster: 1 Slot: 1 BM ID:
+  5510400000000 BoardType:5 Rack:5 Cluster: 1 Slot: 4 BM ID:
+  5510200000000 BoardType:5 Rack:5 Cluster: 1 Slot: 2 BM ID:
+  42000100000000 BoardType:42 Rack:0 Cluster: 0 Slot: 1 BM ID:
+  44620000000000 BoardType:44 Rack:6 Cluster: 2 Slot: 0 BM ID:
+  42410200000000 BoardType:42 Rack:4 Cluster: 1 Slot: 2 BM ID:
+  42100000000000 BoardType:42 Rack:1 Cluster: 0 Slot: 0 BM ID:
+  42000300000000 BoardType:42 Rack:0 Cluster: 0 Slot: 3 BM ID:
+  42020300000000 BoardType:42 Rack:0 Cluster: 2 Slot: 3 BM ID:
+  42020500000000 BoardType:42 Rack:0 Cluster: 2 Slot: 5 BM ID:
+  42020000000000 BoardType:42 Rack:0 Cluster: 2 Slot: 0 BM ID:
+  42020400000000 BoardType:42 Rack:0 Cluster: 2 Slot: 4 BM ID:
+  42020100000000 BoardType:42 Rack:0 Cluster: 2 Slot: 1 BM ID:
+  42020200000000 BoardType:42 Rack:0 Cluster: 2 Slot: 2 BM ID:
+  44020000000000 BoardType:44 Rack:0 Cluster: 2 Slot: 0 BM ID:
+  42000400000000 BoardType:42 Rack:0 Cluster: 0 Slot: 4 BM ID:
+  7610000000000 BoardType:7 Rack:6 Cluster: 1 Slot: 0 BM ID:
+  5620200000000 BoardType:5 Rack:6 Cluster: 2 Slot: 2 BM ID:
+  5610300000000 BoardType:5 Rack:6 Cluster: 1 Slot: 3 BM ID:
+  5610000000000 BoardType:5 Rack:6 Cluster: 1 Slot: 0 Found BMID:
+  5610000000000 BM interface version : host 24439 / remote 24439 BM
+  image info: SVN version 1.6.11.1 - Built at Sep 8 2022 18:34:45
+
+  BM Version: 1.6.11.1 / Required Baseline: 1.0.25.3 CpuId: 003E002A
+  58535013 20363458 BM reports boardType=5
+
+  BM Telemetry is disable (previous stage = 0)
+
+  Opening DEV_LD devices in slot 0 …  Opening DEV_LD id=0 …  Opening
+  DEV_DUART id=0 …  Opening DEV_PWRONSEQ id=0 …  Opening DEV_BMADC id=0
+  …  Opening DEV_BCM53202 id=0 …  Opening DEV_PHY id=0 …  Opening
+  DEV_BMJTAG_MASTER id=0 …  Opening DEV_BMQSPIFLASH id=0 …  Opening
+  DEV_LM5066 id=0 …  Opening DEV_SI534X id=0 …  Opening DEV_ISL8273 id=0
+  …  Opening DEV_ZL9010 id=0 …  Opening DEV_ADM1293 id=0 …  Opening
+  DEV_0RQP_XOS10B id=0 …  Opening DEV_ISL68127 id=0 …  Opening
+  DEV_TCA6416 id=0 …  Opening DEV_TCA9535 id=0 …  Opening DEV_PCA9539
+  id=0 …  Opening DEV_MAX31790 id=0 …  Opening DEV_TMP421 id=0 …
+  Opening DEV_TLC5910 id=0 …  Opening DEV_MC24AA025 id=0 …  Opening
+  DEV_SPD id=0 …  Opening DEV_FIREFLY id=0 …  Opening DEV_SHUFFLE id=0 …
+  Opening DEV_LD_TCI id=0 …  Opening DEV_SU id=0 …  Opening DEV_SYS id=0
+  …  Opening DEV_SD id=0 …  Opening DEV_BF id=0 …  Opening DEV_I2C_UTIL
+  id=0 …  Opening DEV_GPIO_UTIL id=0 …  Opening DEV_TELEMETRY_UTIL id=0
+  …  Opening DEV_ENH_DIAG id=0 …  ipcPort = 5076
+
+  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+  LD Offline Diagnostics Release 1.10.0 LD_MFG_DIAG Dated 09/12/22
+  16:19:49 GMT Compiled by ** trana [trana_ap2rel] ** Build path:
+  /grid/cva/p4_05/trana/ap2rel/diag/ld Build host: bw-8 Build server:
+  Linux bw-8 2.6.32-642.el6.x86_64 #1 SMP Wed Apr 13 00:51:26 EDT 2016
+  x86_64 x86_64 x86_64 GNU/Linux
+  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+  set -tISL68127vout -pdev=5555 -pvout= 0.8448; run -f -tISL68127vout
+  LD-0: Running ISL68127VOUT Test {ISL681275} -> 1 ISL68127 (U1K0)
+  V0P88_SCORE_SD0 (dbmap=0x00000001) page=0, VOUT_SET= 0.845V (raw=034C)
+  ISL68127 (U1K0) V0P88_SCORE_SD0 (dbmap=0x00000001) page=0, VOUT_READ=
+  0.844V (raw=034C) ISL68127 (U1K1) V0P88_SCORE_SD1 (dbmap=0x00000004)
+  page=0, VOUT_SET= 0.845V (raw=034C) ISL68127 (U1K1) V0P88_SCORE_SD1
+  (dbmap=0x00000004) page=0, VOUT_READ= 0.844V (raw=034C) ISL68127
+  (U1K2) V0P88_SCORE_SD2 (dbmap=0x00000010) page=0, VOUT_SET= 0.845V
+  (raw=034C) ISL68127 (U1K2) V0P88_SCORE_SD2 (dbmap=0x00000010) page=0,
+  VOUT_READ= 0.844V (raw=034C) ISL68127 (U1K3) V0P88_SCORE_SD3
+  (dbmap=0x00000040) page=0, VOUT_SET= 0.845V (raw=034C) ISL68127 (U1K3)
+  V0P88_SCORE_SD3 (dbmap=0x00000040) page=0, VOUT_READ= 0.844V
+  (raw=034C) ISL68127 (U1K4) V0P88_SCORE_SD4 (dbmap=0x00000100) page=0,
+  VOUT_SET= 0.845V (raw=034C) ISL68127 (U1K4) V0P88_SCORE_SD4
+  (dbmap=0x00000100) page=0, VOUT_READ= 0.844V (raw=034C) ISL68127
+  (U1K5) V0P88_SCORE_SD5 (dbmap=0x00000400) page=0, VOUT_SET= 0.845V
+  (raw=034C) ISL68127 (U1K5) V0P88_SCORE_SD5 (dbmap=0x00000400) page=0,
+  VOUT_READ= 0.844V (raw=034C) ISL68127 (U1K6) V0P88_SCORE_SD6
+  (dbmap=0x00001000) page=0, VOUT_SET= 0.845V (raw=034C) ISL68127 (U1K6)
+  V0P88_SCORE_SD6 (dbmap=0x00001000) page=0, VOUT_READ= 0.844V
+  (raw=034C) ISL68127 (U1K7) V0P88_SCORE_SD7 (dbmap=0x00004000) page=0,
+  VOUT_SET= 0.845V (raw=034C) ISL68127 (U1K7) V0P88_SCORE_SD7
+  (dbmap=0x00004000) page=0, VOUT_READ= 0.844V (raw=034C) LD-0:
+  ISL68127VOUT - ISL68127 Set VOUT Util {ISL681275} Completed
+  Successfully -> 1 RUN ALL TESTS COMPLETED [LD] 0>2% WARNING: OFFLINE
+  HWDIAGS is destructive …  Please reinitialize your system accordingly
+  before resuming normal operation
+
+
+3.3.3 DONE Reboot BF
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  • State "DONE" from "WAITING" [2022-11-03 Thu 14:05]
+  • State "WAITING" from "STARTED" [2022-11-03 Thu 13:25]
+  • State "STARTED" from "TODO" [2022-11-03 Thu 13:21] (2022-11-03
+    13:22:15) tiagof@hsv-smd405 in ~/…/test_new_ld/mockD λ $ ssh
+    root@ldd114 The authenticity of host 'ldd114 (10.254.9.114)' can't
+    be established.  RSA key fingerprint is
+    SHA256:OVFrQytIdF5VSkfmKowXQj4Smp7wmkDtAd83gpeaY6s.  RSA key
+    fingerprint is MD5:4f:8d:d5:24:70:56:48:43:82:f6:f5:cc:88:33:99:15.
+    Are you sure you want to continue connecting (yes/no)? yes Warning:
+    Permanently added 'ldd114,10.254.9.114' (RSA) to the list of known
+    hosts.  Last login: Thu Nov 3 11:47:16 2022
+    root@hsv-smd405-ldd114:~# reboot Connection to ldd114 closed by
+    remote host.  Connection to ldd114 closed.
+
+
+3.4 TODO Run MockD
+──────────────────
+
+3.4.1 DONE Compile
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  • State "DONE" from "WAITING" [2022-11-03 Thu 14:10]
+  • State "WAITING" from "STARTED" [2022-11-03 Thu 14:09]
+  • State "STARTED" from "TODO" [2022-11-03 Thu 14:08] Success
+
+
+3.4.2 DONE Run
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+  • State "DONE" from "WAITING" [2022-11-03 Thu 14:13]
+  • State "WAITING" from "STARTED" [2022-11-03 Thu 14:12]
+  • State "STARTED" from "TODO" [2022-11-03 Thu 14:11]
+    [tiagof@hsv-smd405 1D_smd405_stress]$ ../run hsv-smd405 xeDebug -
+    22H1_WXE, V22.04.150.a002
+
+    (c) 1991-2021 Cadence Design Systems, Inc. All rights reserved
+    worldwide.  See files in <rootdir>/share/vxe/install/Copyrights
+    WARNING (legacy-52177): There is no remote shell in your path.
+    Check the value of XE_SECURE_CONNECTION and your OS environment.
+    XE> source ../ple_timer.tcl XE> xeset retryDownload 2000 2000 XE>
+    xeset retryInterval 30 30 XE> XE> ple_timer -start debug INFO:
+    ple_timer #1 debug started XE> debug .  XE> ple_timer -stop debug
+    INFO: ple_timer -stop debug = 946 ms XE> XE> ple_timer -start host
+    INFO: ple_timer #2 host started XE> if {$argc == 1} { host [lindex
+    $argv 0] -dbe .  } else { host .  } INFO (legacy-0): Opening Reduced
+    PDB…  INFO (legacy-39111): Opening PDB iceMock mockTop (of=8).  INFO
+    (legacy-0): 27064 critical net names have been restored: elapsed
+    time 0 sec INFO (legacy-0): strtab has been restored: elapsed time 0
+    sec INFO (legacy-0): 1109 cells have been restored: elapsed time 0
+    sec INFO (legacy-0): 2090827 smTrNets have been restored: elapsed
+    time 0 sec INFO (legacy-0): 1 smTrPrims have been restored: elapsed
+    time 0 sec INFO (legacy-0): sigmap has been restored: elapsed time 0
+    sec INFO (legacy-0): flat-conns have been restored: elapsed time 1
+    sec INFO (legacy-0): 4103782 synonyms have been setup: elapsed time
+    0 sec INFO (legacy-0): smNetIDs have been setup: elapsed time 0 sec
+    INFO (legacy-0): CRT-FULL has been restored: elapsed time 0 sec INFO
+    (legacy-51751): Setting emulator to hsv-smd405 from host
+    command. DBEngine host is hsv-smd405.  WARNING (legacy-52174):
+    Attempting to run on configmgr host hsv-smd405.  INFO
+    (legacy-51578): Opened xeConnect port 46294 on host hsv-smd405
+    (10.206.176.55) for xeDebug process 44716.  DBEngine - 22H1_WXE,
+    V22.04.150.a002
+
+    INFO (legacy-47055): Running in design directory:
+    '/home/tiagof/temp/test_new_ld/mockD/newMockDsA2/1D_smd405_stress'
+    init_ddr4_controller(devId = 0005000100000017, type = 0), waited for
+    1.00166 s: data = 0 FATAL: DDR4 memory controller type 0 failed to
+    inialize, devId = 0005000100000017 register_operation_error
+    ../domain_reset.C:1678 operator() (Error Code: -1811939328
+    (0x94000000)) register_operation_error ../domain_reset.C:1678
+    operator() (Error Code: -1811939328 (0x94000000)) *** Error in
+    `/lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine':
+    corrupted double-linked list: 0x0000000001861910 *** Saving stack at
+    fault to file 'tmp/stackdump.45267.2102200064.txt'…  `====='
+    Backtrace: `=======' /usr/lib64/libc.so.6(+0x7f3e4)[0x2aee38a2a3e4]
+    /usr/lib64/libc.so.6(+0x8132d)[0x2aee38a2c32d]
+    /usr/lib64/libc.so.6(+0x39d10)[0x2aee389e4d10]
+    /usr/lib64/libc.so.6(+0x39d37)[0x2aee389e4d37]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4a4c75)[0x2aee36a81c75]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4aacc9)[0x2aee36a87cc9]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4aece0)[0x2aee36a8bce0]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(_ZN8sd_reset17check_ddr_memfillE9ext_mem_ti+0x304)[0x2aee36a8804a]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(_ZN8sd_reset8mem_fillEv+0x1b9)[0x2aee36a87775]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(_ZN8sd_reset12domain_resetE11mem_speed_tS0_+0x5c8)[0x2aee36a8224c]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4a3ff1)[0x2aee36a80ff1]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b2678)[0x2aee36a8f678]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b20d7)[0x2aee36a8f0d7]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b18eb)[0x2aee36a8e8eb]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b0fe5)[0x2aee36a8dfe5]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b0cac)[0x2aee36a8dcac]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal16custom_schedulerINS0_20IntelSchedulerTraitsEE19process_bypass_loopERNS0_20context_guard_helperILb0EEEPNS_4taskEl+0x30d)[0x2aee7891ac8d]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal16custom_schedulerINS0_20IntelSchedulerTraitsEE18local_wait_for_allERNS_4taskEPS4_+0xf6)[0x2aee7891af16]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal5arena7processERNS0_17generic_schedulerE+0x1a7)[0x2aee78913f97]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal6market7processERN3rml3jobE+0x20)[0x2aee789124d0]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal3rml14private_worker3runEv+0x4c)[0x2aee7890e5dc]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal3rml14private_worker14thread_routineEPv+0x9)[0x2aee7890e819]
+    /usr/lib64/libpthread.so.0(+0x7ea5)[0x2aee37489ea5]
+    /usr/lib64/libc.so.6(clone+0x6d)[0x2aee38aa98dd] `=====' Memory map:
+    `======' 00400000-00448000 r–p 00000000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    00448000-0056f000 r-xp 00048000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    0056f000-005c9000 r–p 0016f000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    005ca000-005cb000 r–p 001c9000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    005cb000-005ce000 rw-p 001ca000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    005ce000-0067c000 rw-p 00000000 00:00 0 01624000-1291f000 rw-p
+    00000000 00:00 0 [heap] 1291f000-12920000 rw-p 00000000 00:00 0
+    [heap] 12920000-12932000 rw-p 00000000 00:00 0 [heap]
+    12932000-12933000 rw-p 00000000 00:00 0 [heap] 12933000-160bf000
+    rw-p 00000000 00:00 0 [heap] 160bf000-160cf000 rw-p 00000000 00:00 0
+    [heap] 160cf000-16605000 rw-p 00000000 00:00 0 [heap]
+    16605000-19328000 rw-p 00000000 00:00 0 [heap] 19328000-19329000
+    rw-p 00000000 00:00 0 [heap] 19329000-19339000 rw-p 00000000 00:00 0
+    [heap] 19339000-1933a000 rw-p 00000000 00:00 0 [heap]
+    1933a000-1935b000 rw-p 00000000 00:00 0 [heap] 1935b000-1935c000
+    rw-p 00000000 00:00 0 [heap] 1935c000-1936c000 rw-p 00000000 00:00 0
+    [heap] 1936c000-1936d000 rw-p 00000000 00:00 0 [heap]
+    1936d000-1938e000 rw-p 00000000 00:00 0 [heap] 1938e000-1938f000
+    rw-p 00000000 00:00 0 [heap] 1938f000-1939f000 rw-p 00000000 00:00 0
+    [heap] 1939f000-193a0000 rw-p 00000000 00:00 0 [heap]
+    193a0000-193c1000 rw-p 00000000 00:00 0 [heap] 193c1000-1bc4e000
+    rw-p 00000000 00:00 0 [heap] 1bc4e000-1be70000 rw-p 00000000 00:00 0
+    [heap] 1be70000-1be71000 rw-p 00000000 00:00 0 [heap]
+    1be71000-1be81000 rw-p 00000000 00:00 0 [heap] 1be81000-1be82000
+    rw-p 00000000 00:00 0 [heap] 1be82000-1be92000 rw-p 00000000 00:00 0
+    [heap] 1be92000-1be9b000 rw-p 00000000 00:00 0 [heap]
+    1be9b000-1cfbd000 rw-p 00000000 00:00 0 [heap] 1cfbd000-1cfbe000
+    rw-p 00000000 00:00 0 [heap] 1cfbe000-1cfdf000 rw-p 00000000 00:00 0
+    [heap] 1cfdf000-1cfe0000 rw-p 00000000 00:00 0 [heap]
+    1cfe0000-1cff0000 rw-p 00000000 00:00 0 [heap] 1cff0000-1cff1000
+    rw-p 00000000 00:00 0 [heap] 1cff1000-1d012000 rw-p 00000000 00:00 0
+    [heap] 1d012000-1d013000 rw-p 00000000 00:00 0 [heap]
+    1d013000-1d023000 rw-p 00000000 00:00 0 [heap] 1d023000-1d5a1000
+    rw-p 00000000 00:00 0 [heap] 2aee3356a000-2aee3358c000 r-xp 00000000
+    fd:00 46306 /usr/lib64/ld-2.17.so 2aee3358c000-2aee3358e000 rw-p
+    00000000 00:00 0 2aee3358e000-2aee335a1000 r–p 00000000 00:93
+    1133241834
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libqtutil.so
+    2aee335a1000-2aee335ca000 r-xp 00013000 00:93 1133241834
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libqtutil.so
+    2aee335ca000-2aee335d3000 r–p 0003c000 00:93 1133241834
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libqtutil.so
+    2aee335d3000-2aee335d4000 —p 00045000 00:93 1133241834
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libqtutil.so
+    2aee335d4000-2aee335d5000 r–p 00045000 00:93 1133241834
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libqtutil.so
+    2aee335d5000-2aee335d7000 rw-p 00046000 00:93 1133241834
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libqtutil.so
+    2aee335d7000-2aee335dd000 r–p 00000000 00:93 1157899605
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libvec.so
+    2aee335dd000-2aee335f2000 r-xp 00006000 00:93 1157899605
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libvec.so
+    2aee335f2000-2aee335f8000 r–p 0001b000 00:93 1157899605
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libvec.so
+    2aee335f8000-2aee335f9000 r–p 00020000 00:93 1157899605
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libvec.so
+    2aee335f9000-2aee335fa000 rw-p 00021000 00:93 1157899605
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libvec.so
+    2aee335fa000-2aee335fc000 r–p 00000000 00:93 1157899602
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libvcp.soSaving
+    stack at fault to file 'tmp/stackdump.45267.2144184064.txt'…
+    register_operation_error ../domain_reset.C:1678 operator() (Error
+    Code: -1811939328 (0x94000000)) register_operation_error
+    ../domain_reset.C:1678 operator() (Error Code: -1811939328
+    (0x94000000)) *** Error in
+    `/lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine':
+    corrupted double-linked list: 0x000000000181d2f0 *** `====='
+    Backtrace: `=======' /usr/lib64/libc.so.6(+0x809bf)[0x2aee38a2b9bf]
+    /usr/lib64/libc.so.6(+0x8117e)[0x2aee38a2c17e]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libsmDB.so(_ZN4smdb9PoolTableD1Ev+0x3f)[0x2aee3403d7bf]
+    /usr/lib64/libc.so.6(+0x39ce9)[0x2aee389e4ce9]
+    /usr/lib64/libc.so.6(+0x39d37)[0x2aee389e4d37]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4a4c75)[0x2aee36a81c75]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4aacc9)[0x2aee36a87cc9]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4aece0)[0x2aee36a8bce0]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(_ZN8sd_reset17check_ddr_memfillE9ext_mem_ti+0x304)[0x2aee36a8804a]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(_ZN8sd_reset8mem_fillEv+0x208)[0x2aee36a877c4]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(_ZN8sd_reset12domain_resetE11mem_speed_tS0_+0x5c8)[0x2aee36a8224c]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4a3ff1)[0x2aee36a80ff1]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b2678)[0x2aee36a8f678]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b20d7)[0x2aee36a8f0d7]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b18eb)[0x2aee36a8e8eb]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b0fe5)[0x2aee36a8dfe5]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libetnbcs.so(+0x4b0cac)[0x2aee36a8dcac]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal16custom_schedulerINS0_20IntelSchedulerTraitsEE19process_bypass_loopERNS0_20context_guard_helperILb0EEEPNS_4taskEl+0x30d)[0x2aee7891ac8d]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal16custom_schedulerINS0_20IntelSchedulerTraitsEE18local_wait_for_allERNS_4taskEPS4_+0xf6)[0x2aee7891af16]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal5arena7processERNS0_17generic_schedulerE+0x1a7)[0x2aee78913f97]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal6market7processERN3rml3jobE+0x20)[0x2aee789124d0]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal3rml14private_worker3runEv+0x4c)[0x2aee7890e5dc]
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/lib/64bit/libtbb.so(_ZN3tbb8internal3rml14private_worker14thread_routineEPv+0x9)[0x2aee7890e819]
+    /usr/lib64/libpthread.so.0(+0x7ea5)[0x2aee37489ea5]
+    /usr/lib64/libc.so.6(clone+0x6d)[0x2aee38aa98dd] `=====' Memory map:
+    `======' 00400000-00448000 r–p 00000000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    00448000-0056f000 r-xp 00048000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    0056f000-005c9000 r–p 0016f000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    005ca000-005cb000 r–p 001c9000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    005cb000-005ce000 rw-p 001ca000 00:93 1114711615
+    /lan/cva_rel/wxe22h1/22.04.150.a002/tools.lnx86/bin/64bit/DBEngine
+    005ce000-0067c000 rw-p 00000000 00:00 0 01624000-1291f000 rw-p
+    00000000 00:00 0 [heap] 1291f000-12920000 rw-p 00000000 00:00 0
+    [heap] 12920000-12932000 rw-p 00000000 00:00 0 [heap]
+    12932000-12933000 rw-p 00000000 00:00 0 [heap] 12933000-160bf000
+    rw-p 00000000 00:00 0 [heap] 160bf000-160cf000 rw-p 00000000 00:00 0
+    [heap] 160cf000-16605000 rw-p 00000000 00:00 0 [heap]
+    16605000-19328000 rw-p 00000000 00:00 0 [heap] 19328000-19329000
+    rw-p 00000000 00:00 0 [heap] 19329000-19339000 rw-p 00000000 00:00 0
+    [heap] 19339000-1933a000 rw-p 00000000 00:00 0 [heap]
+    1933a000-1935b000 rw-p 00000000 00:00 0 [heap] 1935b000-1935c000
+    rw-p 00000000 00:00 0 [heap] 1935c000-1936c000 rw-p 00000000 00:00 0
+    [heap] 1936c000-1936d000 rw-p 00000000 00:00 0 [heap]
+    1936d000-1938e000 rw-p 00000000 00:00 0 [heap] 1938e000-1938f000
+    rw-p 00000000 00:00 0 [heap] 1938f000-1939f000 rw-p 00000000 00:00 0
+    [heap] 1939f000-193a0000 rw-p 00000000 00:00 0 [heap]
+    193a0000-193c1000 rw-p 00000000 00:00 0 [heap] 193c1000-1bc4e000
+    rw-p 00000000 00:00 0 [heap] 1bc4e000-1be70000 rw-p 00000000 00:00 0
+    [heap] 1be70000-1be71000 rw-p 00000000 00:00 0 [heap]
+    1be71000-1be81000 rw-p 00000000 00:00 0 [heap] 1be81000-1be82000
+    rw-p 00000000 00:00 0 [heap] 1be82000-1be92000 rw-p 00000000 00:00 0
+    [heap] 1be92000-1be9b000 rw-p 00000000 00:00 0 [heap]
+    1be9b000-1cfbd000 rw-p 00000000 00:00 0 [heap] 1cfbd000-1cfbe000
+    rw-p 00000000 00:00 0 [heap] 1cfbe000-1cfdf000 rw-p 00000000 00:00 0
+    [heap] 1cfdf000-1cfe0000 rw-p 00000000 00:00 0 [heap]
+    1cfe0000-1cff0000 rw-p 00000000 00:00 0 [heap] 1cff0000-1cff1000
+    rw-p 00000000 00:00 0 [heap] 1cff1000-1d012000 rw-p 00000000 00:00 0
+    [heap] 1d012000-1d013000 rw-p 00000000 00:00 0 [heap]
+    1d013000-1d023000 rw-p 00000000 00:00 0 [heap] 1d023000-1d5a1000
+    rw-p 00000000 00:00 0 [heap]ERROR (legacy-50919): DBEngine ended
+    unexpectedly.  Exiting xeDebug.  ERROR (legacy-25579):
+    xeDebug/DBEngine communication error.  ERROR (legacy-25579): init hw
+    failed: RPC failure in receiving result.  ERROR (legacy-25579): The
+    connection to the emulator (via DBEngine) has been lost, and you
+    must reconnect to the emulator (using the command "host
+    <emulatorHostName>").  ERROR (legacy-50911): host command failed:
+    RPC error: init hw failed.
+
+        while executing "host [lindex $argv 0] -dbe ."  (file
+    "../runLong.qel" line 14) WARNING (legacy-54241): The workstation
+    was running low on memory (free memory dropped to 4 GB), therefore
+    the performance might be impacted.  diff: mem.out: No such file or
+    directory diff: hdlRun.log: No such file or directory No such File
+    or Directory Differences follow: [tiagof@hsv-smd405
+    1D_smd405_stress]$

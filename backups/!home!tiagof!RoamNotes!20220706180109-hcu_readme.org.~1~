@@ -1,0 +1,69 @@
+:PROPERTIES:
+:ID:       81080dad-5259-4785-98f8-08ac77c51272
+:END:
+#+title: HCU-README
+HCU Release 2
+=============
+
+------------------------------------------------------------------
+NOTE: In release 2 we support only local SMD0 installation. 
+------------------------------------------------------------------
+
+Install script is located :         /et3mach/Cadence/red/share/wxe/install/installHCU_R2.sh
+HCU Release 2 tar file is located:  /et3mach/Cadence/red/share/wxe/etc/hcu_R2.tar.gz
+README_HCU_R2 file is located:      /et3mach/Cadence/red/share/wxe/install/README_HCU_R2
+
+
+How to run the install script:
+Usage: installHCU.sh [-option] [parameter]
+    Installs HCU software. All parameters are optional. 
+	By default removes current HCU installation from SMD and 
+    installs new HCU version from release directory /et3mach/Cadence/red
+    Options:
+    -d        Parameter: user-specified local database path, e.g. /et3mach/database
+              If no -d is specified, the default location is /et3mach/HCU/HCU_dB
+    -u        Upgrades HCU image only. No parameter is needed.
+    -r        Removes HCU from SMD. No parameter is needed.
+    -h        Displays this help.
+
+
+Examples:
+     $ /et3mach/Cadence/red/share/wxe/install/installHCU_R2.sh   
+	 - removes current HCU installation, then installs HCU from release directory, starts container. 
+	 Database location is /et3mach/HCU/HCU_dB
+     $ /et3mach/Cadence/red/share/wxe/install/installHCU_R2.sh -d /et3mach/database
+     - removes current HCU installation, then installs HCU from release directory, starts container. 
+	 Database location is /et3mach/database
+	 $ /et3mach/Cadence/red/share/wxe/install/installHCU_R2.sh -u 
+	 - stops HCU container, replaces HCU image, starts new HCU container. Database location is not changed.
+	 $ /et3mach/Cadence/red/share/wxe/install/installHCU_R2.sh -r
+	 removes HCU from SMD.
+	 $ /et3mach/Cadence/red/share/wxe/install/installHCU_R2.sh -h
+	 displays the help.
+
+
+Successful Result :
+  1. HCU container named "hcu_<emulator_name>" is running.
+     To check if it is running, execute the following command:
+	 $ docker ps -a
+     CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
+     f79af474c1c3 cent7_all_v2.0 "/bin/sh -c bash" 54 minutes ago Up 54 minutes 0.0.0.0:8080->80/tcp hcu_<emulator_name>
+	 
+  2. User can connect to HCU container:
+     $ ssh root@<docker_host> -p 9090  (from remote location) 
+	 or 
+	 $ ssh root@<container_IP> (from <localhost>)
+     Password "cadence".
+     To find out <container_IP>, run the following command: 
+     $ docker inspect -f "{{ .NetworkSettings.IPAddress }}" hcu_<emulator_name>
+	 
+  3. Ssh command will bring you inside container, which is CentosOS 7 linux system. You can browse around.
+      a. Try connect to mysql using 'lmysql' command, password is 'Cadence!123'. 
+	      It should give you mysql prompt. "Exit" to exit from MySQL.
+      b. Check 'crontab -l' - one job should be scheduled there for data ingestion
+      c. Check the status of the services running in the container : 
+	      # cd ~
+		  # ./status.sh
+      d. Type 'exit' command to get out from container. Container still should show up in 'docker ps' output as running.
+	  
+  4. Check <db_location> directory on local SMD, it should contain mysql log file from the container.

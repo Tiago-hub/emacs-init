@@ -1,0 +1,53 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : utils.py
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+
+from subprocess import run
+
+
+def get_unit_mac(unit):
+    """ Return the WKU mac address as a string """
+    subproc_res = run(["/et3mach/bin/apsm", "-r"], capture_output=True,
+                      text=True, check=True)
+    for line in subproc_res.stdout.splitlines():
+        if unit.upper() in line:
+            return line.split()[5]
+    else:
+        return None
+
+
+def get_unit_ip(mac_addr):
+    """ Return the IP based on BM MAC addr from WKU """
+    with open("/etc/dhcp/poe-fixed-ip.conf", "r") as file_d:
+        for line in file_d:
+            if mac_addr.lower() in line.lower():
+                next_line = next(file_d, None)
+                if "fixed-address" not in next_line:
+                    raise Exception(f"Line after MAC addr {mac_addr} did not "
+                                    f"contained the fixed-address field")
+                else:
+                    return next_line.split()[1].rstrip(";")
+        else:
+            return None
+

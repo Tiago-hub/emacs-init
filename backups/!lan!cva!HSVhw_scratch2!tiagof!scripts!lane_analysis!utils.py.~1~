@@ -1,0 +1,128 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : utils.py
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+from datetime import datetime
+
+def halve_list(inputlist):
+
+    length = len(inputlist)
+    n = length//2 
+    first_half=inputlist[:n]
+    sec_half=inputlist[n:]
+
+    return first_half,sec_half
+
+
+def search_log_text(full_log, list_length, match_time):
+    last_len = list_length
+    indexes_log = list(range(last_len))
+    while(True):
+        if last_len < 2:
+            break
+        
+        first_half, second_half = halve_list(full_log)
+        first_indexes, second_indexes = halve_list(indexes_log)
+        halfs = [first_half, second_half]
+        indexes = [first_indexes, second_indexes]
+        half_index = None
+        
+        for index, half in enumerate(halfs):
+            #test if time is greater than first entry and minor than 
+            #last entry
+            begin_line = half[0]
+            end_line = half[-1]
+            begin_time = None
+            end_time = None
+
+            match = match_time.match(begin_line)
+            if match:
+                begin_time = match.group(1)
+                begin_time = datetime.strptime(begin_time, "%Y/%m/%d %H:%M:%S")
+
+            match = match_time.match(end_line)
+            if match:
+                end_time = match.group(1)
+                end_time = datetime.strptime(end_time, "%Y/%m/%d %H:%M:%S")
+                
+            if begin_time is not None and end_time is not None:
+
+                if time_failure >= begin_time \
+                   and time_failure <= end_time:
+                   # the log is this half
+                    half_index = index
+
+                else:
+                    if index > 0:
+                        # second half test fails
+                        # probably failure time is between last entry
+                        # of first half and first entry of second half
+                        # lets try to split halfs in half again, so
+                        # it ould be 4 parts. Try to join the 2/4 +
+                        # 3/4 to have a "third half" to try
+
+                        one_quarter, two_quarter = halve_list(
+                            halfs[0])
+                        three_quarter, four_quarter = halve_list(
+                            halfs[1])
+
+                        if len(two_quarter) >= 2 or len(three_quarter) >= 2:
+
+
+                            one_log, two_log = halve_list(indexes[0])
+                            three_log, four_log = halve_list(indexes[1])
+
+                            begin_line = two_quarter[0]
+                            end_line = three_quarter[-1]
+
+                            match = match_time.match(begin_line)
+                            if match:
+                                begin_time = match.group(1)
+                                begin_time = datetime.strptime(begin_time, "%Y/%m/%d %H:%M:%S")
+
+                            match = match_time.match(end_line)
+                            if match:
+                                end_time = match.group(1)
+                                end_time = datetime.strptime(end_time, "%Y/%m/%d %H:%M:%S")
+
+                            if begin_time is not None and end_time is not None:
+
+                                if time_failure >= begin_time \
+                                and time_failure <= end_time:
+                                # the log is in this "third" half
+                                    full_log = two_quarter + three_quarter
+                                    indexes_log = two_log + three_log
+                                    last_len = len(full_log)
+                                    continue
+
+        if half_index is None:
+            # print(first_half[-1])
+            # print(second_half[0])
+            # print(begin_time, end_time)
+            # print("deu ruim")
+            break
+        else:
+            full_log = halfs[half_index]
+            indexes_log = indexes[half_index]
+            last_len = len(full_log)
+    return indexes_log

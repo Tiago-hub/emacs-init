@@ -1,0 +1,9 @@
+:PROPERTIES:
+:ID:       2a5e59c1-bc75-41db-96ca-d22b4814cc94
+:END:
+#+title: 2022-07-28
+
+* TODO Check xediags regression time acquire method.
+    Correa reported that power down times are strange in new release. Also the exec
+    time and reinit time are sparsed by 2 minutes. So wtf is xediags doing during
+    this time?

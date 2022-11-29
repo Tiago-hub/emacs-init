@@ -1,0 +1,20 @@
+:PROPERTIES:
+:ID:       0e6cfe87-5cc7-45de-826f-6067fe483486
+:END:
+#+title: 2022-10-11
+
+* Week objectives
+    - [X] Setup wiki page for UEFI BF (andreis record)
+    - [-] Review wxe dashboard [1/4]
+      * [X] Change port for backend application
+      * [ ] Give a better look to console div
+      * [ ] Date order
+      * [ ] Setup in 409, 411a and 411b
+    - [ ] Test HCU report generation with a bigger time range in smds to try
+      catch memory error
+
+* TODO Ask Yulia about sql permissions
+
+* TODO Config gunicorn for timeout properties
+
+* TODO check 405 and 303 telegraphs

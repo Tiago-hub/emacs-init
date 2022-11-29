@@ -1,0 +1,427 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+"""
+-------------------------------------------------------------------------------
+  Project     : Cadence Production Diags
+  File        : scan_temperatures.py
+  Company     : Cadence Design Systems
+  Author      : Tiago da Costa Ferreira
+  Version     : v0.1
+--------------------------------- CONFIDENTIAL --------------------------------
+
+                Copyright 2022 by Cadence Design Systems, Inc.
+
+  All  rights reserved.   No part  of  this source  code may  be reproduced  or
+  transmitted in any form or by  any means, electronic or mechanical, including
+  photocopying,  recording, or  any information  storage and  retrieval system,
+  without permission in writing from Cadence Design Systems, Inc.
+
+  Further, no use of this source code is permitted in any form or means without
+  a valid, written license agreement with Cadence Design Systems, Inc.
+
+                            Cadence Design Systems
+                                www.cadence.com
+-------------------------------------------------------------------------------
+"""
+
+import os, sys, re, json
+from datetime import datetime
+import optparse
+import time
+start_time = time.time()
+
+#function which split the list into two halves
+def halve_list(inputlist):
+
+    length = len(inputlist)
+    n = length//2 
+    first_half=inputlist[:n]
+    sec_half=inputlist[n:]
+
+    return first_half,sec_half
+
+
+def search_log_text(full_log, list_length, match_time):
+    last_len = list_length
+    indexes_log = list(range(last_len))
+    while(True):
+        if last_len < 2:
+            break
+        
+        first_half, second_half = halve_list(full_log)
+        first_indexes, second_indexes = halve_list(indexes_log)
+        halfs = [first_half, second_half]
+        indexes = [first_indexes, second_indexes]
+        half_index = None
+        
+        for index, half in enumerate(halfs):
+            #test if time is greater than first entry and minor than 
+            #last entry
+            begin_line = half[0]
+            end_line = half[-1]
+            begin_time = None
+            end_time = None
+
+            match = match_time.match(begin_line)
+            if match:
+                begin_time = match.group(1)
+                begin_time = datetime.strptime(begin_time, "%Y/%m/%d %H:%M:%S")
+
+            match = match_time.match(end_line)
+            if match:
+                end_time = match.group(1)
+                end_time = datetime.strptime(end_time, "%Y/%m/%d %H:%M:%S")
+                
+                
+            if begin_time is not None and end_time is not None:
+
+                if time_failure >= begin_time \
+                   and time_failure <= end_time:
+                   # the log is this half
+                    half_index = index
+
+                else:
+                    if index > 0:
+                        # second half test fails
+                        # probably failure time is between last entry
+                        # of first half and first entry of second half
+                        # lets try to split halfs in half again, so
+                        # it ould be 4 parts. Try to join the 2/4 +
+                        # 3/4 to have a "third half" to try
+
+                        one_quarter, two_quarter = halve_list(
+                            halfs[0])
+                        three_quarter, four_quarter = halve_list(
+                            halfs[1])
+
+                        if len(two_quarter) >= 2 or len(three_quarter) >= 2:
+
+
+                            one_log, two_log = halve_list(indexes[0])
+                            three_log, four_log = halve_list(indexes[1])
+
+                            begin_line = two_quarter[0]
+                            end_line = three_quarter[-1]
+
+                            match = match_time.match(begin_line)
+                            if match:
+                                begin_time = match.group(1)
+                                begin_time = datetime.strptime(begin_time, "%Y/%m/%d %H:%M:%S")
+
+                            match = match_time.match(end_line)
+                            if match:
+                                end_time = match.group(1)
+                                end_time = datetime.strptime(end_time, "%Y/%m/%d %H:%M:%S")
+
+                            if begin_time is not None and end_time is not None:
+
+                                if time_failure >= begin_time \
+                                and time_failure <= end_time:
+                                # the log is in this "third" half
+                                    full_log = two_quarter + three_quarter
+                                    indexes_log = two_log + three_log
+                                    last_len = len(full_log)
+                                    continue
+
+        if half_index is None:
+            # print(first_half[-1])
+            # print(second_half[0])
+            # print(begin_time, end_time)
+            # print("deu ruim")
+            break
+        else:
+            full_log = halfs[half_index]
+            indexes_log = indexes[half_index]
+            last_len = len(full_log)
+    return indexes_log
+
+
+
+p = optparse.OptionParser()
+p.add_option
+
+p.add_option("-t",
+             action="store",
+             dest="lane_error_type",
+             )
+p.add_option("--log_root",
+            action = "store",
+            dest="log_root")
+
+p.add_option("--target",
+            action="store",
+            dest="target")
+
+p.add_option("--failing_lanes",
+            action="store",
+            dest="failing_lanes")
+
+p.set_defaults(lane_error_type="ce")
+p.set_defaults(log_root=None)
+p.set_defaults(target=None)
+p.set_defaults(failing_lanes="./files/nvidia_aug_2.txt")
+
+opts, args = p.parse_args();  # if -h or --help, display help output and exit
+
+
+log_roots = {
+    "jun": "/lan/cva/bldg11_eng/CustomerPDZ/Nvidia/mekong-3R/PDZ-Report_root_mekong-emu_30Jun1152/log",
+    "aug": "/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_13Aug1047/log",
+    "aug2": "/lan/cva/fpe_work/rmathur/Nvidia/PDZ-Report_root_mekong-emu_21Aug1416/log"
+}
+
+log_root = opts.log_root if opts.log_root is not None else log_roots["aug2"]
+target = opts.target
+json_name = f'data_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.json'
+failing_lanes = opts.failing_lanes
+lane_error_type = opts.lane_error_type
+
+lanes_info = []
+with open(failing_lanes) as file:
+    
+    if lane_error_type == "ue":
+        pattern = ("(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*? lane "
+                   "(\d+,\d+,\d+,\d+,\d+,\d+,\d+)"
+                   "->"
+                   "(\d+,\d+,\d+,\d+,\d+,\d+,\d+) "
+                   "during LSM monitoring")
+    elif lane_error_type == "ce":
+        pattern = ("\[(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2})\] "
+                   "(\d+,\d+,\d+,\d+,\d+,\d+,\d+)"
+                   "->"
+                   "(\d+,\d+,\d+,\d+,\d+,\d+,\d+)")
+        
+    match_target = re.compile(pattern)
+
+    for line in file.readlines():
+        match = match_target.match(line)
+        if match:
+            log_time = match.group(1)
+            rx = match.group(2)
+            tx = match.group(3)
+            
+            if lane_error_type == "ue":
+                log_time = datetime.strptime(log_time, "%Y/%m/%d %H:%M:%S")
+            elif lane_error_type == "ce":
+                log_time = datetime.strptime(log_time, "%m/%d/%Y %H:%M:%S")
+
+            rx_info = rx.split(",")
+            rx = {
+                "type": "SOD" if rx_info[0] == "03" else "LD",
+                "proc": "SU" if rx_info[1] == "0" else "SD",
+                "rack": rx_info[2],
+                "cluster": rx_info[3],
+                "slot": rx_info[4],
+                "chip": rx_info[5],
+                "lane": rx_info[6],
+                "rx/tx": "rx"
+            }
+            tx_info = tx.split(",")
+            tx = {
+                "type": "SOD" if tx_info[0] == "03" else "LD",
+                "proc": "SU" if tx_info[1] == "0" else "SD",
+                "rack": tx_info[2],
+                "cluster": tx_info[3],
+                "slot": tx_info[4],
+                "chip": tx_info[5],
+                "lane": tx_info[6],
+                "rx/tx": "tx"
+            }
+
+        lanes_info.append({
+            "time": log_time,
+            "rx": rx,
+            "tx": tx
+        })
+
+log_files = {}
+pattern_time = "(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2})"
+match_time = re.compile(pattern_time)
+pattern_tele = ("(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*] "
+                "(\w+) (\w+): (\d+\.\d+)")
+match_tele = re.compile(pattern_tele)
+pattern_cooling = ("(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*. coldloop "
+                "temperature (\d+\.\d+)")
+match_cooling = re.compile(pattern_cooling)
+
+devices_to_check = 2*len(lanes_info)
+counter = 0
+
+devices_telemetry = {}
+for lane in lanes_info:
+    devices = [lane["rx"], lane["tx"]]
+    time_failure = lane["time"]
+
+    for device in devices:
+        
+        print(device)
+        print(lane)
+        print(f"{counter}/{devices_to_check} devices checked")
+        counter+=1
+        date_folder = datetime.strftime(time_failure,"%m-%d-%Y")
+        time_folder  = datetime.strftime(time_failure,"%H-%M-%S")
+        
+        log_file = (f'{device["type"]}_{device["rack"]}.{device["cluster"]}'
+                       f'.{device["slot"]}.log')
+        
+        cooling_file = f'WKU_{device["rack"]}.0.0.log'
+
+        path_to_log = os.path.join(log_root, date_folder, log_file)
+        path_to_cooling = os.path.join(log_root, date_folder, cooling_file)
+        #print(path_to_log)
+
+        log_lines = []
+        cooling_lines = []
+        log_index_offset = 0
+        cooling_index_offset = 0
+
+        if os.path.exists(path_to_log):
+            found_timestamp = False
+            with open(path_to_log) as file:
+                for line in file:
+                    if not found_timestamp:
+                        log_index_offset += 1
+                        match = match_time.match(line)
+                        if match:
+                            found_timestamp = True
+                            log_lines.append(line)
+                    else:
+                        log_lines.append(line)
+                #log_files[f"{date_folder}_{log_file}"] = log_lines
+            last_len = len(log_lines)
+            full_log = log_lines 
+            indexes_log = search_log_text(full_log, last_len, match_time)
+
+            print(time_failure)
+            if len(indexes_log) > 1:
+                log_start_index = halve_list(indexes_log)[1][0]
+            else:
+                log_start_index = indexes_log[0]
+            log_start_index += log_index_offset
+            print(log_lines[log_start_index])
+
+            # search log for info
+            finish_increment = False
+            finish_decrement = False
+            counter_up = log_start_index
+            counter_down = log_start_index
+            counters = [counter_up, counter_down]
+
+            device_telemetry = {"lane_fail_time":lane["time"]}
+            while(True):
+                for index, count in enumerate(counters):
+                    line = log_lines[count]
+                    match = match_tele.match(line)
+                    if match:
+                        log_time = match.group(1)
+                        sensor = match.group(2)
+                        measure = match.group(3)
+                        value = match.group(4)
+
+                        log_time = datetime.strptime(log_time, "%Y/%m/%d %H:%M:%S")
+                        time_diff = (lane["time"] - log_time)
+
+                        if (abs(time_diff.total_seconds())) > 60*5:
+                            if index == 0:
+                                finish_increment = True
+                            else:
+                                finish_decrement = True
+
+                        else:
+                            if device_telemetry.get(sensor) is None:
+                                device_telemetry[sensor] = {}
+
+                            if device_telemetry[sensor].get(measure) is None:
+                                device_telemetry[sensor][measure] = {"time":[],
+                                                                     "value":[]}
+
+                            #device_telemetry[sensor][measure].append((log_time,
+                            #                                          value))
+                            device_telemetry[sensor][measure]["time"].append(
+                                log_time)
+                            device_telemetry[sensor][measure]["value"].append(
+                                value
+                            )
+                                
+                        
+                    if index == 0:
+                        counters[index] += 1
+                    else:
+                        counters[index] -= 1
+
+                if finish_increment and finish_decrement:
+                    break;
+                
+            #search for the coldloop temperature
+            if os.path.exists(path_to_cooling):
+                found_timestamp = False
+                with open(path_to_cooling) as file:
+                    for line in file:
+                        if not found_timestamp:
+                            cooling_index_offset += 1
+                            match = match_time.match(line)
+                            if match:
+                                found_timestamp = True
+                                cooling_lines.append(line)
+                        else:
+                            cooling_lines.append(line)
+                last_len = len(cooling_lines)
+                full_log = cooling_lines
+                indexes_log = search_log_text(full_log, last_len, match_time)
+                if len(indexes_log) > 1:
+                    cooling_start_index = halve_list(indexes_log)[1][0]
+                else:
+                    cooling_start_index = indexes_log[0]
+                cooling_start_index += cooling_index_offset 
+                finish_increment = False
+                finish_decrement = False
+                counter_up = cooling_start_index
+                counter_down = cooling_start_index
+                counters = [counter_up, counter_down]
+                
+                device_telemetry["coldloop"] = {"time":[], "value":[]}
+
+                while(True):
+                    for index, count in enumerate(counters):
+                        line = cooling_lines[count]
+                        match = match_cooling.match(line)
+                        if match:
+                            log_time = match.group(1)
+                            value = match.group(2)
+
+                            log_time = datetime.strptime(log_time, "%Y/%m/%d %H:%M:%S")
+                            time_diff = (lane["time"] - log_time)
+                               
+                            if (abs(time_diff.total_seconds())) > 60*5:
+                                if index == 0:
+                                    finish_increment = True
+                                else:
+                                    finish_decrement = True
+                            else:
+                                device_telemetry["coldloop"]["time"].append(
+                                    log_time)                            
+                                device_telemetry["coldloop"]["value"].append(
+                                    value
+                                )
+     
+                        if index == 0:
+                            counters[index] += 1
+                        else:
+                            counters[index] -= 1
+
+                    if finish_increment and finish_decrement:
+                        break;
+                    
+            #add info to dict
+            device_telemetry["lane"] = device
+            telemetry_key = (f'{device["type"]}_{device["rack"]}_'
+                             f'{device["cluster"]}_{device["slot"]}_'
+                             f'{time_failure.strftime("%Y-%m-%dH%H:%M:%S")}')
+            devices_telemetry[telemetry_key] = device_telemetry
+    #break
+
+#print(json.dumps(devices_telemetry, indent=4, sort_keys=True, default=str))
+json_name = "test.json"
+with open(json_name, 'w') as f:
+    data = json.dumps(devices_telemetry, indent=4, sort_keys=True, default=str)
+    f.write(data)
+print("--- %s seconds ---" % (time.time() - start_time))

@@ -1,0 +1,15 @@
+;;;; Emacs Bookmark Format Version 1 ;;;; -*- coding: utf-8-emacs -*-
+;;; This format is meant to be slightly human-readable;
+;;; nevertheless, you probably don't want to edit it.
+;;; -*- End Of Bookmark File Format Version Stamp -*-
+(("org-capture-last-stored"
+ (filename . "~/RoamNotes/20221118060022-ld_test_ld111.org")
+ (front-context-string . "\nTarget boards: ")
+ (rear-context-string . ": ld_test_LD111\n")
+ (position . 91))
+("scratch"
+ (filename . "/lan/cva/HSVhw_scratch2/tiagof/")
+ (front-context-string . "HCU\n  drwxr-xr-x")
+ (rear-context-string . "96 Jun 22 07:12 ")
+ (position . 240))
+)

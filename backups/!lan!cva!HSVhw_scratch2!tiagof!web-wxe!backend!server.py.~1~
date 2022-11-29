@@ -1,0 +1,239 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+
+from socket import timeout
+from flask import Flask, request
+from flask_cors import CORS, cross_origin
+import subprocess as commands
+from datetime import datetime
+import re
+import os, sys
+from urllib import parse
+import json
+import sqlite3
+
+app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+cadence_node = "/grid/common/pkgs/node/v10.14.0/bin"
+
+def get_localhost():
+    cmd2run = ["hostname"]
+    subproc = commands.run(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True)
+    return subproc.stdout.splitlines()[0]
+
+
+@app.route('/wxe-info', methods=['GET', 'POST'])
+@cross_origin()
+def wxe_info():
+    emulator = get_localhost()
+    con = sqlite3.connect("wxe.db")
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+    # get the count of tables with the name
+    query = ("SELECT date, emulator, branch, version, result,"
+            " atlassian_page from installations"
+            f" where emulator like \"{emulator}\"")
+    cur.execute(query)
+
+    rows = cur.fetchall()
+    answer = {"data": []}
+    for row in rows:
+        atl_link = f'<a href="{row["atlassian_page"]}">Wiki page</a>'
+        temp_date = datetime.strptime(row["date"],
+                                      '%d/%m/%Y %H:%M:%S')
+        my_date = temp_date.strftime('%d/%m/%Y')
+        my_time = temp_date.strftime('%H:%M:%S')
+        answer["data"].append([
+            my_date,
+            my_time,
+            row["emulator"],
+            row["branch"],
+            row["version"],
+            row["result"],
+            atl_link
+        ])
+
+    return json.dumps(answer)
+
+
+@app.route('/emulator', methods=['GET', 'POST'])
+@cross_origin()
+def get_emulators():
+    with open('config/emulators.json', 'r') as myfile:
+        data=myfile.read()
+
+    obj = json.loads(data)
+    emulators = obj["emulators"]
+    return json.dumps(emulators)
+
+@app.route('/ibhost', methods=['GET', 'POST'])
+@cross_origin()
+def get_ibhosts():
+    with open('config/ibhosts.json', 'r') as myfile:
+        data=myfile.read()
+
+    obj = json.loads(data)
+    ibhosts = obj["ibhosts"]
+    return json.dumps(ibhosts)
+
+@app.route('/branch', methods=['GET', 'POST'])
+@cross_origin()
+def get_wxe_branch():
+    return json.dumps(["main", "22h1", "21h1"])
+
+@app.route('/version', methods=['GET', 'POST'])
+@cross_origin()
+def get_wxe_versions():
+    branch = request.args.get("branch")
+    rel_path = "/lan/cva_rel/wxe"
+    if branch == "main":
+        rel_path += "_main"
+    else:
+        rel_path += branch
+
+    cmd2run = f"ls -lr {rel_path} |grep -vE \"xeDiags|release|pcie|tmp|temp|del|et3confg\" | head | awk 'NR>1\u007bprint$9\u007d'"
+    subproc = commands.run(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True, shell=True)
+    out = subproc.stdout.strip().split()
+
+    return json.dumps(out)
+
+
+@app.route('/install', methods=['GET', 'POST'])
+@cross_origin()
+def install():
+    emulator = get_localhost()
+    branch = request.args.get("branch")
+    version = request.args.get("version")
+    mail_list = request.args.get("mail_list").split(";")
+    automation_dir = os.path.join(os.getcwd(), "test-automation")
+    atlassian_dir = os.path.join(os.getcwd(), "atlassian-emulators")
+    debug = False
+    has_dir = os.path.isdir(automation_dir)
+
+    if not has_dir:
+        print("Creating directory to host test automation source code...")
+        os.mkdir(automation_dir)
+        print("Clonning repository...")
+        cmd2run = ["git", "clone", "git@gitlab.cadence.com:hsvsysint/test-automation.git",
+                   automation_dir]
+        subproc = commands.run(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True)
+        print(subproc.stdout)
+
+    else:
+        print("Pulling the most recent source code for test automation...")
+        cmd2run = ["git", "--git-dir", f"{automation_dir}/.git", "pull"]
+        subproc = commands.run(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True)
+        print(subproc.stdout)
+
+    has_dir = os.path.isdir(atlassian_dir)
+
+    if not has_dir:
+        print("Creating directory to host atlassian api source code...")
+        os.mkdir(atlassian_dir)
+        print("Clonning repository...")
+        cmd2run = ["git", "clone", "git@gitlab.cadence.com:tiagof/atlassian-emulators.git",
+                   atlassian_dir]
+        subproc = commands.run(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True)
+        print(subproc.stdout)
+
+    else:
+        print("Pulling the most recent source code for atlassian api...")
+        cmd2run = ["git", "--git-dir", f"{atlassian_dir}/.git", "pull"]
+        subproc = commands.run(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True)
+        print(subproc.stdout)
+
+    if cadence_node not in os.environ["PATH"]:
+        os.environ["PATH"] += f":{cadence_node}"
+
+    cmd2run = ["npm", "i", "--production"]
+    subproc = commands.Popen(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True,
+                             cwd="./atlassian-emulators")
+    for line in iter(subproc.stdout.readline, ''):
+        line = line.replace('\r','').replace('\n','')
+        print(line)
+
+
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
+    cmd2run = [f"{automation_dir}/wxe_reg/wxeinstall/test_wxeinstall.py",
+               "-e", emulator, "--wxe_branch", branch,
+               "--force_version", version,
+               "--exit_on_fail", "yes"]
+
+    tc_report_path = "/lan/cva/HSVhw_scratch2/tiagof/web-wxe/backend/testresults/08-04-2022/10.07.15/test_wxeinstall.py.mail"
+
+    if not debug:
+        subproc = commands.Popen(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True)
+        for line in iter(subproc.stdout.readline, ''):
+            line = line.replace('\r', '').replace('\n', '')
+            if "Final_Report() mail file" in line:
+                tc_report_path = line.split(" ")[-1]
+            print(line)
+            sys.stdout.flush()
+    file_content = "<p>Unable to find tc report path. Please check logs</p>"
+    if tc_report_path is not None:
+        with open (tc_report_path) as file:
+            file_content = file.read()
+
+    # post report to wiki
+
+    info_tuple = (emulator, branch, version, dt_string)
+
+    cmd2run = ["post_html.sh", tc_report_path,"~tiagof",
+               str.join("_",info_tuple),
+               "562654254"]
+    print(str.join("_",info_tuple))
+    subproc = commands.Popen(cmd2run, stdout=commands.PIPE, stderr=commands.STDOUT, text=True, cwd="./atlassian-emulators")
+
+    json_answer = []
+    found_line = False
+    for line in iter(subproc.stdout.readline, ''):
+        line = line.replace('\r','').replace('\n','')
+        if line.startswith("{") or found_line:
+            found_line = True
+            json_answer.append(line)
+        # print(line)
+
+    request_answer = json.loads(str.join("\n",(json_answer)))
+    atlassian_page = ""
+
+    if request_answer["status"] != "current":
+        print("error during Atlassian api communication")
+        print(request_answer["status"])
+        print(request_answer["text"])
+
+    else:
+        print("Success creating Atlassian page")
+        atlassian_page = f"{request_answer['_links']['base']}{request_answer['_links']['webui']}"
+        print(f"Page available at {atlassian_page}")
+
+
+    # save into db
+    con = sqlite3.connect("wxe.db")
+    cur = con.cursor()
+    # get the count of tables with the name
+    cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='installations' ''')
+
+    # if the count is 0, then table does not exists
+    if cur.fetchone()[0]==0 :
+        print("Creating installations table")
+        cur.execute('''CREATE TABLE installations
+               (date datetime, emulator text, branch text, version text,
+                result boolean, atlassian_page text, tc_report text)''')
+    if not debug:
+        insert_tuple = (dt_string, emulator, branch, version, True,
+                        atlassian_page, file_content)
+        cur.execute("insert into installations values (?, ?, ?, ?, ?, ?, ?)",
+                    insert_tuple)
+
+    # commit the changes to db
+    con.commit()
+    # close the connection
+    con.close()
+
+
+    return json.dumps({"status": "success", "content": file_content})
+
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0', port = 8050)

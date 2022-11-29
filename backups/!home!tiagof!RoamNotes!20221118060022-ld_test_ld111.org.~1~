@@ -1,0 +1,46 @@
+:PROPERTIES:
+:ID:       54a9b6d4-fa02-4c3f-9388-dc3e7c71a1e8
+:END:
+#+title: ld_test_LD111
+
+Target boards: SOD22, SOD23 and LD134
+
+* Normal conditions
+    1. Reinit boards using xeDiags
+    2. Compile MockD job
+    3. Run MockD job
+
+    *All boards reinit without problems*
+
+** LD 111
+    1. [X] Compile: Ok
+    2. [X] Run: Ok
+    Logs available at: /lan/cva/HSVhw_scratch2/tiagof/mockd/newMockDsA2/smd405_LD134
+** SOD 22
+    * [X] Compile: Ok
+    * [X] Run: Fail
+
+    Logs available at: /lan/cva/HSVhw_scratch2/tiagof/mockd/newMockDsA2/smd405_SOD22
+** SOD 23
+    1. [X] Compile: Ok
+    2. [X] Run: Ok
+    Logs available at: /lan/cva/HSVhw_scratch2/tiagof/mockd/newMockDsA2/smd405_SOD23
+
+* Stress conditions
+    The stress conditions  are the following:
+        1.	Lower 5% for several rails (including DIMMs 1.2V nominal): 
+            a.	/et3mach/HW_DIAG/ld/diag -m <host> -d <bdevid> -c "set -tvmar1 -pvmargin=1; run -f -tvmar1"
+        2.	Lower 4% for Sd SerDesCore (0.88V nominal):
+            a.	/et3mach/HW_DIAG/ld/diag -m <host> -d <bdevid> -c "set -tISL68127vout -pdev=5555 -pvout=0.8448; run -f -tISL68127vout"
+        3.	Reboot BF
+    If we go for 5% low on step #2, it might fall below 0.80V spec for some lanes, given the known ~40mV drop.
+
+** LD 134
+    1. [X] Compile: Ok
+    2. [X] Run: Ok
+    Logs available at: /lan/cva/HSVhw_scratch2/tiagof/mockd/newMockDsA2/smd405_LD134_stress
+
+** SOD 23
+    1. [X] Compile: Ok
+    2. [X] Run: Ok
+    Logs available at: /lan/cva/HSVhw_scratch2/tiagof/mockd/newMockDsA2/smd405_SOD23_stress

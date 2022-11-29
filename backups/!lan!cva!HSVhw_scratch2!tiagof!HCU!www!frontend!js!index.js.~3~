@@ -1,0 +1,69 @@
+import Home from "./views/Home.js";
+import Ingest from "./views/Ingest.js";
+import Reports from "./views/Reports.js";
+
+const navigateTo = url => {
+    history.pushState(null, null, url);
+    router();
+};
+
+const router = async () => {
+    const routes = [
+        {path: "/", view: Home},
+        {path:"/ingest", view: Ingest},
+        {path:"/reports", view: Reports}
+    ];
+    
+    const potentialMatches = routes.map(
+        route => {
+            return {
+                route: route,
+                isMatch: location.pathname === route.path
+            }
+        }
+    )
+    
+    let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch)
+    if(!match)
+        match = {
+            route: routes[0],
+            isMatch: true
+        }
+
+    const view = new match.route.view();
+
+    document.querySelector("#app").innerHTML = await view.getHtml();
+    
+    if (match.route.path === "/reports"){
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault()
+            const formdata = Object.fromEntries(new FormData(e.target).entries());
+            var host = window.location.host
+            var form = new FormData(e.target)
+            const myInit = { method: "POST",
+                       body: form
+                     }
+            fetch('http://'+host+':8050',myInit).then((response) => {
+                console.log(response)
+                response.text().then((text) => {
+                    console.log(text)
+                })
+            })
+        });
+      }
+}
+
+
+//listen to browser history navigation
+window.addEventListener("popstate", router);
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener("click", e => {
+        if (e.target.matches("[data-link]")) {
+            e.preventDefault();
+            navigateTo(e.target.href);
+        }
+    });
+
+    router();
+});

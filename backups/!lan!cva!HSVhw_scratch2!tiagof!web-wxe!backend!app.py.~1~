@@ -1,0 +1,39 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3.7
+
+from socket import timeout
+from flask import Flask, request
+from flask_cors import CORS, cross_origin
+import subprocess as commands
+from datetime import datetime
+import re
+import os, sys
+import lib as utilities
+from urllib import parse
+import json
+
+app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+@app.route('/emulator', methods=['GET', 'POST'])
+@cross_origin()
+def get_emulators():
+    command = ["nmap", "-sn", "10.206.144.0/24"]
+
+@app.route('/ibhost', methods=['GET', 'POST'])
+@cross_origin()
+def get_ibhosts():
+    pass
+
+@app.route('/version', methods=['GET', 'POST'])
+@cross_origin()
+def get_wxe_versions():
+    pass
+
+@app.route('/install', methods=['GET', 'POST'])
+@cross_origin()
+def install():
+    pass
+
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0', port = 8050)

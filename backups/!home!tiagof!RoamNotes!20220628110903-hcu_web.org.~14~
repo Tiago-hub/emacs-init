@@ -1,0 +1,62 @@
+:PROPERTIES:
+:ID:       6eff05a7-1094-41d6-b4c6-d4fc42d3bc84
+:END:
+#+title: hcu-web
+* Requisites:
+    - Nginx
+    - setup nginx config file
+    - python Flask
+    - python flask cors (pip install -U flask-cors)
+* Idea:
+    Serve static using nginx and use python Flask server which nginx can proxy to proccess server and scripts requests
+* Activities
+** DONE Get reports dynamically
+    DEADLINE: <2022-06-30>
+** DONE Run python scripts from wxe branch
+    DEADLINE: <2022-06-30>
+** DONE Add Telegraphs to dashboard
+    DEADLINE: <2022-06-30>
+** DONE Tell user report is being generated
+    DEADLINE: <2022-06-30>
+** DONE Tell user is finished the report generation
+    DEADLINE: <2022-06-30>
+** DONE Adapt the Telegraphs to go inside web dashboard
+    DEADLINE: <2022-07-12>
+*** DONE Trigger "Add measure" event when clicking the button
+        Observation: change the filter order: instead of measure -> device -> rcb ->
+        type NOW IS measure -> board type -> rcb -> device
+        - Available measures: check sql dir and list using filenames
+*** DONE Trigger events using each dropdown selection
+*** DONE Query data using filters
+*** DONE Plot data using plotly JS
+*** DONE Clean cookies on reload
+*** DONE Verify delete traces feature
+*** DONE Extend features to Pressure database
+*** DONE Verify the ET3activity special case.
+        Maybe add a button to get activity?
+*** DONE Fix nginx config file.
+        The nginx config file needs a few more statements to handle downloads
+        It should be like this [[id:d0bf0f31-1f67-422b-aaeb-43e422d68916][hcu-nginx.conf]]
+*** DONE set debug to false
+*** DONE Develop installation script
+        It would be great to have a auto install script for it
+        - [X] Setup nginx file
+        - [X] Check for file tree integrity (mostly dir public/files)
+          Not really needed since files come from perforce
+        - [X] Setup server on container
+*** TODO Chris feedback:
+        Hi, Tiago,
+
+        Things are looking good so far.  I have tried launching Dashboard locally (172.17.0.2) and remotely by port-forwarding (mfg-smd12:8080); both work well.
+
+        Before there are more data for me to experiment further with Telegraph, I have a couple thought for you to consider on Dashboard.
+
+        It is a bit plain for the home page.  For some lower hanging fruits, I am thinking we may add at least one or two ?status? information on the page above:
+
+        a.	The livened of SQL database, such as ?Database : active? with active in green and red if inactive for example.  This can be obtained by ?systemctl status mysqld?.
+
+        b.	The available space for data.  The information ?estimation of disk space remaining: 3340 days? retuned by ?xeDiags MANAGEHCU status?.  Note that this is done by ?/Cadence/emulator/hcu/test_suit.py? from container locally (or /et3mach/bin/python/hcu/test_suit.py on SMD).
+
+        Something similar to this (pardon me for my ugly drawing):
+
+

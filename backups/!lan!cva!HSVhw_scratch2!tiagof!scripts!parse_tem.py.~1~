@@ -1,0 +1,43 @@
+#!/grid/common/pkgs/python/v3.7.2/bin/python3
+from netrc import NetrcParseError
+from utils import board_number_to_address, board_address_to_number
+import subprocess as commands
+import re
+from tabulate import tabulate
+import collections
+
+command = "grep -i --color=never shutdown /et3mach/log/06-16-2022/*"
+subproc = commands.run(command, stdout=commands.PIPE, stderr=commands.STDOUT,
+         text=True, shell=True)
+pattern = ".*?([A-Z]+_\d\.\d\.\d): [\w ]+ (\([\w :.,]+\))"
+match_target = re.compile(pattern)
+board_dict = {}
+table_list = []
+for line in subproc.stdout.split("\n"):
+    match = match_target.match(line) 
+    telemetry_count = "-"
+    if match:
+        board_address = match.group(1)
+        reason = match.group(2)
+        if "EDV_UNI_FF_54_0" in reason:
+            command = f'grep -ic "EDV_UNI_FF_54_0 Temperature: [0-9][0-9]\.[0-9][0-9]" /et3mach/log/06-15-2022/{board_address}.log'
+            subproc2 = commands.run(command, stdout=commands.PIPE, stderr=commands.STDOUT,
+                     text=True, shell=True)
+            telemetry_count = subproc2.stdout.strip("\n")
+
+        board_dict[board_address] = {
+            "reason":reason,
+            "telemetry_count":telemetry_count
+        }
+       
+board_dict = collections.OrderedDict(sorted(board_dict.items()))
+for address in board_dict.keys():
+    reason = board_dict[address]["reason"]
+    telemetry_count = board_dict[address]["telemetry_count"]
+    board_type, board_address = address.split("_")
+    board_number = board_address_to_number(board_type,board_address)
+    table_list.append([address, board_number, reason, telemetry_count])
+
+print(29*"="+"Boards states summary"+29*"=")
+print(tabulate(table_list, headers=['Board address', 'Board number', 'Shutdown reason', 'Non null FF 54 entries in telemetry log']))
+
