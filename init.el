@@ -18,6 +18,7 @@
 
 (load "~/.emacs.d/org-bullets")
 (load "~/.emacs.d/markdown-mode")
+(load "~/.emacs.d/dimmer.el/dimmer")
 (load "~/.emacs.d/indent-guide/indent-guide")
 
 ;; tabs and spaces
@@ -67,9 +68,54 @@
  '((shell . t)
    ))
 
-
-(add-hook 'org-mode-hook '(lambda () (setq fill-column 80)))
+;; limit column to 79 in org mode
+(add-hook 'org-mode-hook '(lambda () (setq fill-column 79)))
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
+
+;;add ruler into column 79 to prog mode
+;;;###autoload
+(define-minor-mode display-fill-column-indicator-mode
+  "Toggle display of `fill-column' indicator.
+This uses `display-fill-column-indicator' internally.
+To change the position of the column displayed by default
+customize `display-fill-column-indicator-column'.  You can change the
+character for the indicator setting `display-fill-column-indicator-character'.
+The globalized version is `global-display-fill-column-indicator-mode',
+which see.
+See Info node `Displaying Boundaries' for details."
+  :lighter nil
+  (if display-fill-column-indicator-mode
+      (progn
+        (setq display-fill-column-indicator t)
+        (unless display-fill-column-indicator-character
+          (setq display-fill-column-indicator-column 79)
+          (setq display-fill-column-indicator-character
+                (if (and (char-displayable-p ?\u2502)
+                         (or (not (display-graphic-p))
+                             (eq (aref (query-font (car (internal-char-font nil ?\u2502))) 0)
+                                 (face-font 'default))))
+                    ?\u2502
+                  ?|))))
+    (setq display-fill-column-indicator nil)))
+
+(defun display-fill-column-indicator--turn-on ()
+  "Turn on `display-fill-column-indicator-mode'."
+  (unless (or (minibufferp)
+              (and (daemonp) (null (frame-parameter nil 'client))))
+    (display-fill-column-indicator-mode)))
+
+;;;###autoload
+(define-globalized-minor-mode global-display-fill-column-indicator-mode
+  display-fill-column-indicator-mode display-fill-column-indicator--turn-on
+)
+
+(provide 'display-fill-column-indicator)
+(add-hook 'prog-mode-hook #'display-fill-column-indicator--turn-on)
+;(setq display-fill-column-indicator-column 80)
+;(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
+
+;;show column number
+(setq column-number-mode t)
 
 ;;python folding
 (add-hook 'python-mode-hook 'outline-minor-mode)
@@ -140,13 +186,30 @@
 
 (use-package flycheck
   :ensure t
-  :init (global-flycheck-mode t))
+  :init (global-flycheck-mode t)
+  (add-hook 'after-init-hook #'global-flycheck-mode)
+  (custom-set-variables
+ '(flycheck-flake8rc "~/.config/flake8")
+ '(flycheck-python-flake8-executable "/home/tiagof/.local/bin/flake8")
+ '(flycheck-python-pycompile-executable "python2")
+ '(flycheck-python-pylint-executable "python2"))
+  )
+
 
 (use-package evil
   :ensure t
   :init 
   (setq evil-want-C-i-jump nil)
   (evil-mode 1))
+
+(defun bb/setup-term-mode ()
+  (evil-local-set-key 'insert (kbd "C-r") 'bb/send-C-r))
+
+(defun bb/send-C-r ()
+  (interactive)
+  (term-send-raw-string "\C-r"))
+
+(add-hook 'term-mode-hook 'bb/setup-term-mode)
 
 (font-lock-add-keywords 'org-mode
                             '(("^ +\\([-*]\\) "
@@ -156,15 +219,17 @@
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 (use-package all-the-icons
   :if (display-graphic-p))
-
-(use-package page-break-lines)
-(use-package projectile)
+(use-package page-break-lines
+  :ensure t)
+(use-package projectile
+  :ensure t)
 (use-package dashboard
   :ensure t
   :config
   (dashboard-setup-startup-hook))
 
-(use-package pulsar)
+(use-package pulsar
+  :ensure t)
 
 (when (fboundp 'windmove-default-keybindings)
   (windmove-default-keybindings))
@@ -178,23 +243,86 @@
  (indent-guide-global-mode)
 
 (use-package rainbow-delimiters)
+ :ensure t
+ :init
  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
 (use-package dumb-jump)
+ :ensure t
+ :init
  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+
+;;org-roam
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  ;(setq org-agenda-files '("~/RoamNotes"))
+  :custom
+  (org-roam-directory "~/RoamNotes")
+  ;; agenda files
+  (org-roam-completion-everywhere t)
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i" . completion-at-point)
+         :map org-roam-dailies-map
+         ("Y" . org-roam-dailies-capture-yesterday)
+         ("T" . org-roam-dailies-capture-tomorrow))
+  :bind-keymap
+  ("C-c n d" . org-roam-dailies-map)
+  :config
+  (require 'org-roam-dailies) ;; Ensure the keymap is available
+  (org-roam-db-autosync-mode))
 
 ;; emacs server
 (server-start)
 (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Insert Cadence header to current file
+;; (Python)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun insert-header ()
+  "Insert Cadence corporate header on file"
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (if (string-match "^#!/" (thing-at-point 'line))
+        ;; Jump one line if there is a '#!' string at top
+        (progn
+          (end-of-line)
+          (newline)))
+    (insert-file-contents "~/.emacs.d/cadence_header.py")
+    (nonincremental-re-search-forward "File +:")
+    (insert (format " %s" (current-buffer)))))
+(global-set-key (kbd "C-c h") 'insert-header)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Insert python header for sections
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun make-header ()
+  (interactive)
+  (insert "#!/grid/common/pkgs/python/v3.7.2/bin/python3.7"))
+
+(setq org-todo-keywords
+        '((sequence "TODO(t)" "STARTED(s!)" "WAITING(w!)" "|" "DONE(d!)" "CANCELLED(c!)")))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(flycheck-flake8rc "~/.config/flake8")
+ '(flycheck-python-flake8-executable "/home/tiagof/.local/bin/flake8")
+ '(flycheck-python-pycompile-executable "python2")
+ '(flycheck-python-pylint-executable "python2")
+ '(org-agenda-files
+   '("~/RoamNotes/20220628110903-hcu_web.org" "/home/tiagof/RoamNotes/agenda.org"))
  '(package-selected-packages
-   '(org-bullets all-the-icons neotree auto-complete which-key try use-package)))
+   '(org dumb-jump rainbow-delimiters org-bullets all-the-icons neotree auto-complete which-key try use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
