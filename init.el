@@ -232,7 +232,7 @@ See Info node `Displaying Boundaries' for details."
   :ensure t)
 
 (when (fboundp 'windmove-default-keybindings)
-  (windmove-default-keybindings))
+  (windmove-default-keybindings 'ctrl))
 
 (require 'dimmer)
  (dimmer-configure-which-key)
@@ -279,6 +279,10 @@ See Info node `Displaying Boundaries' for details."
 ;; emacs server
 (server-start)
 (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+
+;;transparency
+(set-frame-parameter (selected-frame) 'alpha '(90 . 50))
+(add-to-list 'default-frame-alist '(alpha . (90 . 50)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
