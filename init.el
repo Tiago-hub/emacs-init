@@ -14,12 +14,20 @@
 ;;line number
 (global-linum-mode t)
 
-(load-theme 'tango-dark)
+;;load theme
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/dracula/")
+(load-theme 'dracula t)
+;;(load-theme 'tango-dark)
 
+;;load includes
 (load "~/.emacs.d/org-bullets")
 (load "~/.emacs.d/markdown-mode")
 (load "~/.emacs.d/dimmer.el/dimmer")
 (load "~/.emacs.d/indent-guide/indent-guide")
+
+;;vterm
+(use-package vterm
+  :load-path  "~/.emacs.d/emacs-libvterm/")
 
 ;; tabs and spaces
 (setq-default indent-tabs-mode nil)
@@ -164,6 +172,11 @@ See Info node `Displaying Boundaries' for details."
 (use-package all-the-icons
   :ensure t)
 
+(use-package magit
+  :ensure t
+  :config (setq magit-git-executable "/grid/common/pkgsData/git-v2.31.1/Linux/RHEL8.0-2019-x86_64/bin/git")
+  :bind (("C-x g" . magit)))
+
 (use-package neotree
   :ensure t
   :config
@@ -202,14 +215,15 @@ See Info node `Displaying Boundaries' for details."
   (setq evil-want-C-i-jump nil)
   (evil-mode 1))
 
+;;ensure C-r pulls history in terminals
+
 (defun bb/setup-term-mode ()
   (evil-local-set-key 'insert (kbd "C-r") 'bb/send-C-r))
-
 (defun bb/send-C-r ()
   (interactive)
   (term-send-raw-string "\C-r"))
-
 (add-hook 'term-mode-hook 'bb/setup-term-mode)
+(add-hook 'vterm-mode-hook 'bb/setup-term-mode)
 
 (font-lock-add-keywords 'org-mode
                             '(("^ +\\([-*]\\) "
@@ -326,7 +340,7 @@ See Info node `Displaying Boundaries' for details."
  '(org-agenda-files
    '("~/RoamNotes/20220628110903-hcu_web.org" "/home/tiagof/RoamNotes/agenda.org"))
  '(package-selected-packages
-   '(org dumb-jump rainbow-delimiters org-bullets all-the-icons neotree auto-complete which-key try use-package)))
+   '(magit vterm dracula-theme org dumb-jump rainbow-delimiters org-bullets all-the-icons neotree auto-complete which-key try use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

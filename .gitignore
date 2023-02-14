@@ -1,2 +1,5 @@
 # Ignore elpa dir
 elpa
+#ignore backup dir
+backups
+auto-save-list
