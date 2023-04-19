@@ -1,434 +1,544 @@
-((("state" .
-   [1 0 0 0 0])
-  ("server" .
-   [1 0 0 0 0 0])
-  ("POST" .
-   [1 0 0 0])
-  ("app" .
+((("GR_BASE" .
+   [1 0 0 0 0 0 0])
+  ("display-line-numbers-type" .
+   [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("setq-default" .
+   [1 0 0 0 0 0 0 0 0 0 0 0])
+  ("req" .
    [1 0 0])
-  ("diffv" .
-   [1 0 0 0 0])
-  ("params" .
-   [7 0 0 0 1 1])
-  ("app_port" .
-   [3 0 0 2 0 0 0 0])
-  ("dumps" .
-   [1 0 0 0 0])
-  ("output" .
-   [1 0 0 0 0 0])
-  ("log_path" .
-   [1 0 0 0 0 0 0 0])
-  ("search_device_by_date" .
-   [0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0])
-  ("handler" .
+  ("handleError" .
+   [0 0 0 0 0 0 1 0 0 0 0])
+  ("Container" .
+   [1 0 0 0 0 0 0 0 0])
+  ("container" .
+   [1 0 0 0 0 0 0 0 0])
+  ("require" .
+   [1 0 0 0 0 0 0])
+  ("convertMinsToHrsMinsSecs" .
+   [0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("convert" .
    [2 0 0 0 0 0 0])
-  ("tx_rx" .
-   [1 0 0 0 0])
-  ("excel_column" .
-   [0 0 0 0 1 0 0 0 0 0 0 0])
-  ("lanes_conditions" .
-   [0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0])
-  ("lane_condition" .
-   [0 0 0 0 0 1 1 0 0 0 0 0 0 0])
-  ("filtered_data" .
-   [1 0 0 0 0 0 0 0 1 0 0 0 0])
-  ("filter_column" .
-   [2 0 0 0 0 0 0 0 0 0 0 0 0])
-  ("iloc" .
-   [3 0 0 0])
-  ("filter_data" .
-   [2 0 0 0 0 0 0 0 0 0 0])
-  ("tolist" .
-   [1 0 0 0 0 0])
-  ("lanes" .
-   [7 0 0 0 0])
-  ("pd_data" .
-   [3 0 0 0 0 0 0])
-  ("scan_for_bad_lanes" .
-   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0])
-  ("load_xlsx" .
-   [1 0 0 0 0 0 0 0 0])
-  ("excel_data" .
-   [1 0 0 0 0 0 1 0 0 0])
-  ("extension" .
+  ("convertMinsToHrsMins" .
+   [0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1])
+  ("total" .
+   [2 0 0 0 0])
+  ("annotations" .
+   [4 0 0 0 1 0 1 0 0 0 0])
+  ("add_total" .
    [1 0 0 0 0 1 0 0 0])
-  ("file_path" .
-   [2 0 0 0 0 0 0 0 0])
-  ("load" .
-   [1 0 0 0])
-  ("DESCRIPTION" .
-   [1 0 0 0 0 0 0 0 0 0 0])
-  ("main" .
-   [2 0 0 0])
-  ("description" .
-   [1 0 0 0 0 0 0 0 0 0 0])
-  ("hostname" .
-   [2 0 0 0 0 0 0 0])
-  ("line" .
-   [2 0 0 0])
-  ("log_lines" .
-   [3 0 0 0 0 0 0 0 0])
-  ("readlines" .
-   [1 0 0 0 0 0 0 0 0])
-  ("readline" .
-   [0 0 0 0 0 0 0 1])
-  ("path_to_log" .
-   [1 0 0 0 0 0 1 0 0 0 0])
-  ("date_folder" .
-   [1 0 0 0 0 0 0 0 0 0 0])
-  ("log_root" .
-   [1 0 0 0 0 0 0 0])
-  ("log_file" .
-   [3 0 0 0 0 0 0 0])
-  ("log_files" .
-   [2 0 0 0 0 0 0 0 0])
-  ("lanes_info" .
-   [1 0 0 0 0 0 0 0 0 0])
-  ("pattern" .
-   [0 0 0 1 0 0 0])
-  ("match_target" .
-   [0 0 0 0 0 0 0 0 0 0 0 1])
-  ("display-fill-column-indicator--turn-on" .
-   [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0])
-  ("display-fill-column-indicator-column" .
-   [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0])
-  ("initDropdowns" .
-   [0 0 0 0 1 0 0 0 0 0 0 0 0])
-  ("view" .
-   [3 0 0 1])
-  ("await" .
+  ("xaxis" .
    [1 0 0 0 0])
-  ("Home" .
+  ("width" .
+   [2 0 0 0 0])
+  ("value_in_seconds" .
+   [0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0])
+  ("values_in_minutes" .
+   [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("values_in_seconds" .
+   [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0])
+  ("yaxis" .
+   [1 0 0 0 0])
+  ("map" .
+   [3 0 0])
+  ("bar" .
+   [1 0 0])
+  ("traces" .
+   [2 0 0 0 0 0])
+  ("normalized_array" .
+   [2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1])
+  ("total_entries" .
+   [1 0 0 0 0 0 0 0 0 0 1 0 0])
+  ("entries" .
+   [1 0 0 0 1 0 0])
+  ("Object" .
+   [0 0 0 0 0 1])
+  ("of" .
+   [2 0])
+  ("my_index" .
+   [1 0 0 0 0 0 0 0])
+  ("time" .
+   [9 0 0 0])
+  ("stage" .
+   [3 0 0 0 0])
+  ("bringup_values" .
+   [9 0 0 0 0 0 0 0 0 1 0 0 0 0])
+  ("endtime" .
+   [3 0 0 0 0 0 0])
+  ("push" .
+   [4 0 0 0])
+  ("endtimes" .
+   [3 0 0 0 0 0 0 1])
+  ("bringup_times" .
+   [1 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("bringup" .
+   [0 0 0 0 0 0 1])
+  ("to" .
+   [1 0])
+  ("stage_time" .
+   [5 0 0 0 0 0 0 0 0 0])
+  ("timedelta" .
+   [2 0 0 0 0 0 0 0 0])
+  ("total_time" .
+   [14 0 0 0 0 1 0 0 0 0])
+  ("end_time" .
+   [1 0 0 0 0 0 0 0])
+  ("get_power_bringup" .
+   [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0])
+  ("Bringup_time" .
+   [1 0 0 0 0 0 0 0 0 0 0 0])
+  ("reinits" .
+   [1 0 0 0 0 0 0])
+  ("reinit" .
+   [4 0 0 0 0 0])
+  ("limit" .
+   [2 0 0 0 0])
+  ("plot_bringup_dashboard" .
+   [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("error" .
+   [1 0 0 0 0])
+  ("intersection" .
+   [1 0 0 0 0 0 0 0 0 0 0 0])
+  ("lane_str" .
+   [1 0 0 0 0 0 0 0])
+  ("relink" .
+   [1 0 0 0 0 0])
+  ("bad_lanes" .
+   [2 0 0 0 0 0 0 0 0])
+  ("relink_all" .
+   [1 0 0 0 0 0 0 0 0 0])
+  ("join" .
+   [2 0 0 0])
+  ("relink_handler" .
+   [2 0 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("msg" .
+   [3 0 0])
+  ("parse" .
+   [1 0 0 0 0])
+  ("database" .
+   [2 0 0 0 0 0 0 0])
+  ("get_board_type_options" .
+   [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("port" .
+   [2 0 0 0])
+  ("chip_number" .
+   [2 0 0 0 0 0 0 0 0 0 0])
+  ("chip_type" .
+   [2 0 0 0 0 0 0 0 0])
+  ("emulator" .
+   [1 0 0 0 0 0 0 0])
+  ("get_localhost" .
+   [0 0 0 0 1 0 0 0 1 0 0 0 0])
+  ("split" .
+   [2 0 0 0 0])
+  ("stdout" .
+   [1 0 0 0 0 0])
+  ("subproc" .
+   [1 0 0 0 0 0 0])
+  ("json_name" .
+   [1 0 0 0 0 0 0 0 0])
+  ("devices_telemetry" .
+   [0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 1 0])
+  ("telemetry_key" .
+   [1 0 0 0 0 1 0 0 0 0 0 0 0])
+  ("strftime" .
+   [3 0 0 0 1 0 0 0])
+  ("time_failure" .
+   [0 0 0 0 0 0 0 0 0 0 1 0])
+  ("telemetry" .
+   [1 0 0 0 0 0 0 0 0])
+  ("counter" .
+   [1 0 0 0 0 0 0])
+  ("lane" .
+   [2 0 0 0])
+  ("sensor" .
+   [6 0 0 0 0 0])
+  ("device_telemetry" .
+   [0 0 0 1 0 0 0 1 0 2 0 1 3 0 0 1])
+  ("devices" .
+   [2 0 0 0 0 0 0])
+  ("counters" .
+   [1 0 0 0 0 0 0 0])
+  ("finish_decrement" .
+   [0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0])
+  ("finish_increment" .
+   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1])
+  ("use-package" .
+   [0 0 0 0 0 0 0 0 0 0 1])
+  ("do_query" .
+   [1 0 0 0 0 0 0 0])
+  ("board_address_to_number" .
+   [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("temperature" .
+   [0 0 0 0 0 0 0 1 0 0 0])
+  ("log_time" .
+   [3 0 0 0 0 0 0 0])
+  ("board_address" .
+   [0 0 0 0 0 0 0 0 0 0 0 0 1])
+  ("board_dict" .
+   [1 0 0 0 0 0 0 0 0 1])
+  ("group" .
+   [1 0 0 0 0])
+  ("match" .
+   [3 0 0 0 0])
+  ("Temperature" .
+   [0 0 0 0 0 0 0 1 0 0 0])
+  ("cmd2run" .
+   [1 0 0 0 0 0 0])
+  ("add_option" .
+   [1 0 0 0 0 0 0 0 0 0])
+  ("dest" .
    [1 0 0 0])
-  ("home" .
-   [0 0 0 1])
-  ("path" .
+  ("read" .
+   [1 0 0 0])
+  ("xe_output" .
+   [2 0 0 0 0 0 0 0 0])
+  ("check_power_times" .
+   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0])
+  ("opts" .
+   [5 0 0 0])
+  ("filename" .
+   [2 0 0 0 0 0 0 0])
+  ("power_down_times" .
+   [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("power_up_times" .
+   [0 0 0 0 0 0 0 0 1 0 0 0 0 0])
+  ("power_d" .
+   [1 0 0 0 0 0 0])
+  ("const" .
+   [25 0 0 0 0])
+  ("fetch" .
+   [1 0 0 0 0])
+  ("api" .
+   [5 0 0])
+  ("then" .
+   [2 0 0 0])
+  ("response" .
+   [2 0 0 0 0 0 0 0])
+  ("text" .
+   [8 0 0 0])
+  ("console" .
+   [65 0 0 0 0 0 0])
+  ("log" .
+   [64 0 0])
+  ("data" .
+   [28 0 0 0])
+  ("items" .
+   [1 0 0 0 0])
+  ("each" .
+   [3 0 0 0])
+  ("index" .
+   [23 0 0 0 0])
+  ("element" .
+   [43 0 0 1 0 0 0])
+  ("let" .
+   [32 0 0])
+  ("parsed_data" .
+   [3 0 0 0 0 3 3 0 0 0 0])
+  ("append" .
+   [6 0 0 0 0 0])
+  ("select" .
+   [1 0 0 0 0 0])
+  ("attr" .
+   [2 0 0 0])
+  ("switch" .
+   [0 0 0 1 0 0])
+  ("filter_name" .
+   [1 0 0 0 0 0 0 0 0 0 0])
+  ("true" .
+   [13 0 0 0])
+  ("options" .
+   [2 0 0 0 0 0 0])
+  ("select2" .
+   [1 0 0 0 0 0 0])
+  ("lib" .
+   [1 0 0])
+  ("utilities" .
+   [1 0 0 0 0 0 0 0 0])
+  ("request" .
+   [4 0 0 2 0 0 0])
+  ("args" .
+   [7 0 0 0])
+  ("target_element" .
+   [0 0 0 1 0 0 1 0 0 1 0 0 0 6])
+  ("trigger_options" .
+   [1 0 0 0 0 0 0 1 0 0 0 0 0 0 0])
+  ("forEach" .
+   [6 0 0 0 0 0 0])
+  ("trigger_element" .
+   [1 0 0 0 0 0 0 3 0 0 0 0 1 0 2])
+  ("get_url_param" .
+   [2 0 0 0 0 0 1 2 1 0 0 0 0])
+  ("opt" .
+   [1 0 0])
+  ("get" .
+   [12 0 0])
+  ("values" .
+   [20 0 0 0 0 0])
+  ("methods" .
+   [2 0 0 0 0 0 0])
+  ("measure" .
+   [12 0 0 0 3 0 1])
+  ("class_" .
+   [1 0 0 0 0 0])
+  ("no" .
+   [4 0])
+  ("get_board_type" .
+   [0 0 0 0 1 0 1 0 0 1 0 0 1 1])
+  ("val" .
+   [6 0 0])
+  ("start_date" .
+   [10 0 0 0 0 1 1 0 0 8])
+  ("end_date" .
+   [19 0 0 0 0 0 0 0])
+  ("length" .
+   [0 0 0 0 1 0])
+  ("date_ok" .
+   [1 0 0 0 0 1 0])
+  ("false" .
+   [7 0 0 0 0])
+  ("date" .
+   [1 0 0 0])
+  ("ok" .
+   [1 0])
+  ("debug" .
+   [21 0 0 0 0])
+  ("async" .
+   [5 0 0 0 0])
+  ("end" .
+   [6 0 0])
+  ("query" .
+   [11 0 0 0 1])
+  ("Telegraphs" .
+   [2 0 0 0 0 0 2 0 0 1])
+  ("test" .
+   [3 0 0 0])
+  ("telegraph" .
+   [9 0 0 0 0 0 0 0 1])
+  ("event" .
+   [1 0 0 0 0])
+  ("fetch_filter" .
+   [0 0 0 0 0 0 1 0 0 0 0 0])
+  ("trigger_name" .
+   [5 0 0 0 0 1 0 0 0 0 0 0])
+  ("start" .
+   [4 0 0 0 0])
+  ("boards" .
+   [1 0 0 0 0 0])
+  ("board" .
+   [3 0 0 0 0])
+  ("type" .
+   [5 0 0 0])
+  ("RCB" .
+   [2 0 0])
+  ("device" .
+   [8 0 0 0 0 1])
+  ("filter" .
+   [4 0 0 0 0 0])
+  ("filter_map" .
+   [0 0 0 0 0 1 0 0 0 0])
+  ("ctx" .
+   [1 0 0])
+  ("rcb_activate" .
+   [0 0 0 2 0 0 0 0 0 0 0 1])
+  ("filter_type" .
+   [0 0 0 0 0 0 0 0 1 0 0])
+  ("filters" .
+   [4 0 0 0 0 0 0])
+  ("filter_trigger_options" .
+   [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("keys" .
+   [2 0 0 0])
+  ("list_of_filters" .
+   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0])
+  ("list_of_measures" .
+   [2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("getlist" .
+   [2 0 0 0 0 0 0])
+  ("board_type" .
+   [1 0 0 0 0 1 0 0 0 0])
+  ("func_to_call" .
+   [1 0 0 0 0 0 0 1 0 0 0 0])
+  ("brdtype" .
+   [3 0 0 2 0 0 1])
+  ("list_of_board_type" .
+   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0])
+  ("results" .
+   [13 0 0 0 0 0 0])
+  ("list_of_rcb" .
+   [1 0 0 0 0 0 0 0 0 1 0])
+  ("dev" .
+   [1 0 0])
+  ("rcb" .
+   [11 0 0])
+  ("rcbs" .
+   [4 0 0 0])
+  ("device_activate" .
+   [0 0 0 0 0 0 1 0 0 0 0 0 0 0 0])
+  ("activate_map" .
+   [0 0 0 0 0 0 1 0 0 0 0 0])
+  ("activate" .
+   [4 0 0 0 0 0 0 0])
+  ("board_type_activate" .
+   [0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0])
+  ("target" .
+   [3 0 0 0 0 0])
+  ("target_name" .
+   [2 0 0 0 0 0 0 0 0 0 0])
+  ("target_map" .
+   [1 0 0 0 0 0 0 0 0 0])
+  ("siblings" .
+   [1 0 0 0 0 0 0 0])
+  ("selector_string" .
+   [0 0 0 0 0 0 0 0 0 1 1 0 0 1 0])
+  ("btype" .
+   [1 0 0 0 0])
+  ("result" .
+   [7 0 0 0 0 0])
+  ("columns" .
+   [2 0 0 0 0 1 0])
+  ("ingesttime" .
+   [2 0 0 1 1 0 0 0 0 0])
+  ("table" .
+   [1 0 0 0 0])
+  ("key" .
+   [7 0 0])
+  ("serialize" .
+   [0 0 0 0 0 0 1 0 0])
+  ("ResultSet" .
+   [4 0 0 0 0 0 0 0 0])
+  ("row" .
+   [10 0 0])
+  ("Result" .
+   [2 0 0 0 0 0])
+  ("value" .
+   [6 0 0 0 0])
+  ("plot" .
+   [2 0 0 0])
+  ("Plotly" .
+   [2 0 0 0 0 0])
+  ("newPlot" .
+   [1 0 0 0 0 0 0])
+  ("draw" .
    [1 0 0 0])
   ("route" .
    [2 0 0 0 0])
-  ("draw" .
+  ("path" .
    [1 0 0 0])
-  ("newPlot" .
-   [1 0 0 0 0 0 0])
-  ("Plotly" .
-   [2 0 0 0 0 0])
-  ("plot" .
-   [2 0 0 0])
-  ("value" .
-   [6 0 0 0 0])
-  ("Result" .
-   [1 0 0 0 0 0])
-  ("row" .
-   [3 0 0])
-  ("ResultSet" .
-   [3 0 0 0 0 0 0 0 0])
-  ("serialize" .
-   [0 0 0 0 0 0 1 0 0])
-  ("key" .
-   [2 0 0])
-  ("table" .
+  ("home" .
+   [0 0 0 1])
+  ("Home" .
+   [1 0 0 0])
+  ("await" .
    [1 0 0 0 0])
-  ("ingesttime" .
-   [0 0 0 1 1 0 0 0 0 0])
-  ("columns" .
-   [2 0 0 0 0 1 0])
-  ("result" .
-   [2 0 0 0 0 0])
-  ("btype" .
-   [1 0 0 0 0])
-  ("selector_string" .
-   [0 0 0 0 0 0 0 0 0 1 1 0 0 1 0])
-  ("siblings" .
-   [1 0 0 0 0 0 0 0])
-  ("target_map" .
+  ("view" .
+   [4 0 0 1])
+  ("initDropdowns" .
+   [0 0 0 0 1 0 0 0 0 0 0 0 0])
+  ("display-fill-column-indicator-column" .
+   [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0])
+  ("display-fill-column-indicator--turn-on" .
+   [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0])
+  ("match_target" .
+   [0 0 0 0 0 0 0 0 0 0 0 1])
+  ("pattern" .
+   [0 0 0 1 0 0 0])
+  ("lanes_info" .
    [1 0 0 0 0 0 0 0 0 0])
-  ("target_name" .
-   [2 0 0 0 0 0 0 0 0 0 0])
-  ("target" .
-   [3 0 0 0 0 0])
-  ("board_type_activate" .
-   [0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0])
-  ("activate" .
-   [4 0 0 0 0 0 0 0])
-  ("activate_map" .
-   [0 0 0 0 0 0 1 0 0 0 0 0])
-  ("device_activate" .
-   [0 0 0 0 0 0 1 0 0 0 0 0 0 0 0])
-  ("rcbs" .
-   [4 0 0 0])
-  ("rcb" .
-   [11 0 0])
-  ("dev" .
-   [1 0 0])
-  ("list_of_rcb" .
-   [1 0 0 0 0 0 0 0 0 1 0])
-  ("results" .
-   [6 0 0 0 0 0 0])
-  ("list_of_board_type" .
-   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0])
-  ("brdtype" .
-   [3 0 0 2 0 0 1])
-  ("func_to_call" .
-   [1 0 0 0 0 0 0 1 0 0 0 0])
-  ("board_type" .
-   [1 0 0 0 0 1 0 0 0 0])
-  ("getlist" .
-   [2 0 0 0 0 0 0])
-  ("list_of_measures" .
-   [2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
-  ("list_of_filters" .
-   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0])
-  ("keys" .
-   [2 0 0 0])
-  ("filter_trigger_options" .
-   [0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0])
-  ("filters" .
-   [4 0 0 0 0 0 0])
-  ("filter_type" .
-   [0 0 0 0 0 0 0 0 1 0 0])
-  ("rcb_activate" .
-   [0 0 0 2 0 0 0 0 0 0 0 1])
-  ("ctx" .
-   [1 0 0])
-  ("filter_map" .
-   [0 0 0 0 0 1 0 0 0 0])
-  ("filter" .
-   [4 0 0 0 0 0])
-  ("device" .
-   [8 0 0 0 0 1])
-  ("RCB" .
-   [2 0 0])
-  ("type" .
-   [1 0 0 0])
-  ("board" .
-   [3 0 0 0 0])
-  ("boards" .
-   [1 0 0 0 0 0])
-  ("start" .
-   [3 0 0 0 0])
-  ("trigger_name" .
-   [5 0 0 0 0 1 0 0 0 0 0 0])
-  ("fetch_filter" .
-   [0 0 0 0 0 0 1 0 0 0 0 0])
-  ("event" .
-   [1 0 0 0 0])
-  ("telegraph" .
-   [9 0 0 0 0 0 0 0 1])
-  ("test" .
-   [3 0 0 0])
-  ("Telegraphs" .
-   [2 0 0 0 0 0 2 0 0 1])
-  ("query" .
-   [10 0 0 0 1])
-  ("end" .
-   [2 0 0])
-  ("async" .
-   [4 0 0 0 0])
-  ("debug" .
-   [19 0 0 0 0])
-  ("ok" .
-   [1 0])
-  ("date" .
-   [1 0 0 0])
-  ("false" .
-   [7 0 0 0 0])
-  ("date_ok" .
-   [1 0 0 0 0 1 0])
-  ("length" .
-   [0 0 0 0 1 0])
-  ("end_date" .
-   [18 0 0 0 0 0 0 0])
-  ("start_date" .
-   [8 0 0 0 0 1 1 0 0 7])
-  ("val" .
-   [6 0 0])
-  ("get_board_type" .
-   [0 0 0 0 1 0 1 0 0 1 0 0 1 1])
-  ("no" .
-   [4 0])
-  ("class_" .
-   [1 0 0 0 0 0])
-  ("measure" .
-   [12 0 0 0 3 0 1])
-  ("methods" .
-   [2 0 0 0 0 0 0])
-  ("values" .
-   [3 0 0 0 0 0])
-  ("get" .
-   [10 0 0])
-  ("opt" .
-   [1 0 0])
-  ("get_url_param" .
-   [2 0 0 0 0 0 1 2 1 0 0 0 0])
-  ("trigger_element" .
-   [1 0 0 0 0 0 0 3 0 0 0 0 1 0 2])
-  ("forEach" .
-   [2 0 0 0 0 0 0])
-  ("trigger_options" .
-   [1 0 0 0 0 0 0 1 0 0 0 0 0 0 0])
-  ("target_element" .
-   [0 0 0 1 0 0 1 0 0 1 0 0 0 6])
-  ("args" .
-   [7 0 0 0])
-  ("request" .
-   [4 0 0 2 0 0 0])
-  ("utilities" .
-   [1 0 0 0 0 0 0 0 0])
-  ("lib" .
-   [1 0 0])
-  ("select2" .
-   [1 0 0 0 0 0 0])
-  ("options" .
-   [2 0 0 0 0 0 0])
-  ("true" .
-   [12 0 0 0])
-  ("filter_name" .
-   [1 0 0 0 0 0 0 0 0 0 0])
-  ("switch" .
-   [0 0 0 1 0 0])
-  ("attr" .
-   [2 0 0 0])
-  ("select" .
-   [1 0 0 0 0 0])
-  ("append" .
-   [4 0 0 0 0 0])
-  ("parsed_data" .
-   [3 0 0 0 0 3 3 0 0 0 0])
-  ("let" .
-   [18 0 0])
-  ("element" .
-   [27 0 0 0 0 0 0])
-  ("index" .
-   [15 0 0 0 0])
-  ("each" .
-   [3 0 0 0])
-  ("items" .
-   [1 0 0 0 0])
-  ("data" .
-   [24 0 0 0])
-  ("log" .
-   [46 0 0])
-  ("console" .
-   [46 0 0 0 0 0 0])
-  ("text" .
-   [6 0 0 0])
-  ("response" .
-   [2 0 0 0 0 0 0 0])
-  ("then" .
-   [2 0 0 0])
-  ("api" .
-   [5 0 0])
-  ("fetch" .
-   [1 0 0 0 0])
-  ("const" .
-   [22 0 0 0 0])
-  ("power_d" .
-   [1 0 0 0 0 0 0])
-  ("power_up_times" .
-   [0 0 0 0 0 0 0 0 1 0 0 0 0 0])
-  ("power_down_times" .
-   [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
-  ("filename" .
-   [2 0 0 0 0 0 0 0])
-  ("opts" .
-   [5 0 0 0])
-  ("check_power_times" .
-   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0])
-  ("xe_output" .
+  ("log_files" .
    [2 0 0 0 0 0 0 0 0])
-  ("read" .
-   [1 0 0 0])
-  ("dest" .
-   [1 0 0 0])
-  ("add_option" .
-   [1 0 0 0 0 0 0 0 0 0])
-  ("cmd2run" .
-   [1 0 0 0 0 0 0])
-  ("Temperature" .
-   [0 0 0 0 0 0 0 1 0 0 0])
-  ("match" .
-   [3 0 0 0 0])
-  ("group" .
-   [1 0 0 0 0])
-  ("board_dict" .
-   [1 0 0 0 0 0 0 0 0 1])
-  ("board_address" .
-   [0 0 0 0 0 0 0 0 0 0 0 0 1])
-  ("log_time" .
+  ("log_file" .
    [3 0 0 0 0 0 0 0])
-  ("temperature" .
-   [0 0 0 0 0 0 0 1 0 0 0])
-  ("board_address_to_number" .
-   [0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0])
-  ("do_query" .
+  ("log_root" .
    [1 0 0 0 0 0 0 0])
-  ("use-package" .
-   [0 0 0 0 0 0 0 0 0 0 1])
-  ("finish_increment" .
-   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1])
-  ("finish_decrement" .
-   [0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0])
-  ("counters" .
-   [1 0 0 0 0 0 0 0])
-  ("devices" .
-   [2 0 0 0 0 0 0])
-  ("device_telemetry" .
-   [0 0 0 1 0 0 0 1 0 2 0 1 3 0 0 1])
-  ("sensor" .
-   [6 0 0 0 0 0])
-  ("lane" .
-   [2 0 0 0])
-  ("counter" .
-   [1 0 0 0 0 0 0])
-  ("telemetry" .
+  ("date_folder" .
+   [1 0 0 0 0 0 0 0 0 0 0])
+  ("path_to_log" .
+   [1 0 0 0 0 0 1 0 0 0 0])
+  ("readline" .
+   [0 0 0 0 0 0 0 1])
+  ("readlines" .
    [1 0 0 0 0 0 0 0 0])
-  ("time_failure" .
-   [0 0 0 0 0 0 0 0 0 0 1 0])
-  ("strftime" .
-   [1 0 0 0 0 0 0 0])
-  ("telemetry_key" .
-   [1 0 0 0 0 1 0 0 0 0 0 0 0])
-  ("devices_telemetry" .
-   [0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 1 0])
-  ("json_name" .
-   [1 0 0 0 0 0 0 0 0])
-  ("subproc" .
-   [1 0 0 0 0 0 0])
-  ("stdout" .
-   [1 0 0 0 0 0])
-  ("split" .
-   [1 0 0 0 0])
-  ("get_localhost" .
-   [0 0 0 0 1 0 0 0 1 0 0 0 0])
-  ("emulator" .
-   [1 0 0 0 0 0 0 0])
-  ("chip_type" .
-   [2 0 0 0 0 0 0 0 0])
-  ("chip_number" .
-   [2 0 0 0 0 0 0 0 0 0 0])
-  ("port" .
+  ("log_lines" .
+   [3 0 0 0 0 0 0 0 0])
+  ("line" .
    [2 0 0 0])
-  ("get_board_type_options" .
-   [1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
-  ("database" .
+  ("hostname" .
    [2 0 0 0 0 0 0 0])
-  ("parse" .
-   [1 0 0 0 0])
-  ("msg" .
-   [3 0 0])
-  ("relink_handler" .
-   [2 0 0 0 0 0 0 0 0 0 0 0 0 0])
-  ("join" .
+  ("description" .
+   [1 0 0 0 0 0 0 0 0 0 0])
+  ("main" .
    [2 0 0 0])
-  ("relink_all" .
-   [1 0 0 0 0 0 0 0 0 0])
-  ("bad_lanes" .
+  ("DESCRIPTION" .
+   [1 0 0 0 0 0 0 0 0 0 0])
+  ("load" .
+   [1 0 0 0])
+  ("file_path" .
    [2 0 0 0 0 0 0 0 0])
-  ("relink" .
+  ("extension" .
+   [1 0 0 0 0 1 0 0 0])
+  ("excel_data" .
+   [1 0 0 0 0 0 1 0 0 0])
+  ("load_xlsx" .
+   [1 0 0 0 0 0 0 0 0])
+  ("scan_for_bad_lanes" .
+   [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0])
+  ("pd_data" .
+   [3 0 0 0 0 0 0])
+  ("lanes" .
+   [7 0 0 0 0])
+  ("tolist" .
    [1 0 0 0 0 0])
-  ("lane_str" .
+  ("filter_data" .
+   [2 0 0 0 0 0 0 0 0 0 0])
+  ("iloc" .
+   [3 0 0 0])
+  ("filter_column" .
+   [2 0 0 0 0 0 0 0 0 0 0 0 0])
+  ("filtered_data" .
+   [1 0 0 0 0 0 0 0 1 0 0 0 0])
+  ("lane_condition" .
+   [0 0 0 0 0 1 1 0 0 0 0 0 0 0])
+  ("lanes_conditions" .
+   [0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0])
+  ("excel_column" .
+   [0 0 0 0 1 0 0 0 0 0 0 0])
+  ("tx_rx" .
+   [1 0 0 0 0])
+  ("handler" .
+   [2 0 0 0 0 0 0])
+  ("search_device_by_date" .
+   [0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0])
+  ("log_path" .
    [1 0 0 0 0 0 0 0])
-  ("intersection" .
-   [1 0 0 0 0 0 0 0 0 0 0 0])
-  ("error" .
-   [1 0 0 0 0])))
+  ("output" .
+   [1 0 0 0 0 0])
+  ("dumps" .
+   [1 0 0 0 0])
+  ("app_port" .
+   [3 0 0 2 0 0 0 0])
+  ("params" .
+   [7 0 0 0 1 1])
+  ("diffv" .
+   [1 0 0 0 0])
+  ("app" .
+   [1 0 0])
+  ("POST" .
+   [1 0 0 0])
+  ("server" .
+   [1 0 0 0 0 0])
+  ("state" .
+   [1 0 0 0 0])
+  ("setq" .
+   [1 0 0 0])
+  ("strip" .
+   [3 0 0 0 0])
+  ("wraps" .
+   [0 0 1 0 0])
+  ("first" .
+   [1 0 0 0 0])
+  ("check_date_range" .
+   [0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0])
+  ("limit_dates" .
+   [0 0 0 0 0 0 1 0 0 0 0])
+  ("nil" .
+   [1 0 0])))

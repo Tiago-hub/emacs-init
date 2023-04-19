@@ -12,12 +12,20 @@
 (setq visible-bell 1)
 
 ;;line number
-(global-linum-mode t)
+;;(global-linum-mode t)
+(global-display-line-numbers-mode)
+(setq display-line-numbers-type 'relative)
 
 ;;load theme
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/dracula/")
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/monokai-emacs")
 (load-theme 'dracula t)
+(load-theme 'monokai t)
+(enable-theme 'dracula)
 ;;(load-theme 'tango-dark)
+
+;;enable mouse over ssh
+(xterm-mouse-mode 1)
 
 ;;load includes
 (load "~/.emacs.d/org-bullets")
@@ -69,6 +77,7 @@
 
 (org-mode)
     (org-toggle-pretty-entities)
+    (setq org-id-track-globally t)
 
 ;; active Babel languages
 (org-babel-do-load-languages
@@ -202,10 +211,9 @@ See Info node `Displaying Boundaries' for details."
   :init (global-flycheck-mode t)
   (add-hook 'after-init-hook #'global-flycheck-mode)
   (custom-set-variables
- '(flycheck-flake8rc "~/.config/flake8")
- '(flycheck-python-flake8-executable "/home/tiagof/.local/bin/flake8")
- '(flycheck-python-pycompile-executable "python2")
- '(flycheck-python-pylint-executable "python2"))
+ '(flycheck-python-flake8-executable "/grid/common/pkgs/python/v3.7.2/bin/python3.7")
+ '(flycheck-python-pycompile-executable "/grid/common/pkgs/python/v3.7.2/bin/python3.7")
+ '(flycheck-python-pylint-executable "/grid/common/pkgs/python/v3.7.2/bin/python3.7"))
   )
 
 
@@ -240,7 +248,8 @@ See Info node `Displaying Boundaries' for details."
 (use-package dashboard
   :ensure t
   :config
-  (dashboard-setup-startup-hook))
+  (dashboard-setup-startup-hook)
+  (setq dashboard-agenda-release-buffers t))
 
 (use-package pulsar
   :ensure t)
@@ -271,7 +280,7 @@ See Info node `Displaying Boundaries' for details."
   :ensure t
   :init
   (setq org-roam-v2-ack t)
-  ;(setq org-agenda-files '("~/RoamNotes"))
+  (setq org-agenda-files '("~/RoamNotes/agenda/2023"))
   :custom
   (org-roam-directory "~/RoamNotes")
   ;; agenda files
@@ -279,6 +288,7 @@ See Info node `Displaying Boundaries' for details."
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
          ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-id-get-create)
          :map org-mode-map
          ("C-M-i" . completion-at-point)
          :map org-roam-dailies-map
@@ -289,6 +299,58 @@ See Info node `Displaying Boundaries' for details."
   :config
   (require 'org-roam-dailies) ;; Ensure the keymap is available
   (org-roam-db-autosync-mode))
+
+;; jira integration
+(use-package jiralib2
+  :load-path "~/.emacs.d/jiralib2/"
+  :init
+)
+(use-package ejira
+  :load-path "~/.emacs.d/ejira/"
+  :init
+  (setq jiralib2-url              "https://jira.cadence.com"
+        jiralib2-auth             'basic
+        jiralib2-user-login-name  "tiagof"
+        jiralib2-token            nil
+
+        ;; NOTE, this directory needs to be in `org-agenda-files'`
+        ejira-org-directory       "~/jira"
+        ejira-projects            '("EJ" "JL2")
+
+        ejira-priorities-alist    '(("Highest" . ?A)
+                                    ("High"    . ?B)
+                                    ("Medium"  . ?C)
+                                    ("Low"     . ?D)
+                                    ("Lowest"  . ?E))
+        ejira-todo-states-alist   '(("To Do"       . 1)
+                                    ("In Progress" . 2)
+                                    ("Done"        . 3)))
+  :config
+  ;; Tries to auto-set custom fields by looking into /editmeta
+  ;; of an issue and an epic.
+  (add-hook 'jiralib2-post-login-hook #'ejira-guess-epic-sprint-fields)
+
+  ;; They can also be set manually if autoconfigure is not used.
+  ;; (setq ejira-sprint-field       'customfield_10001
+  ;;       ejira-epic-field         'customfield_10002
+  ;;       ejira-epic-summary-field 'customfield_10004)
+
+  (require 'ejira-agenda)
+
+  ;; Make the issues visisble in your agenda by adding `ejira-org-directory'
+  ;; into your `org-agenda-files'.
+  (add-to-list 'org-agenda-files ejira-org-directory)
+
+  ;; Add an agenda view to browse the issues that
+  (org-add-agenda-custom-command
+   '("j" "My JIRA issues"
+     ((ejira-jql "resolution = unresolved and assignee = currentUser()"
+                 ((org-agenda-overriding-header "Assigned to me")))))))
+
+;;clippety -> copy and paste working from wsl tmux
+(use-package clipetty
+  :ensure t
+  :hook (after-init . global-clipetty-mode))
 
 ;; emacs server
 (server-start)
@@ -333,14 +395,56 @@ See Info node `Displaying Boundaries' for details."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(compilation-message-face 'default)
+ '(custom-safe-themes
+   '("37c8c2817010e59734fe1f9302a7e6a2b5e8cc648cf6a6cc8b85f3bf17fececf" default))
+ '(fci-rule-color "#3C3D37")
  '(flycheck-flake8rc "~/.config/flake8")
  '(flycheck-python-flake8-executable "/home/tiagof/.local/bin/flake8")
  '(flycheck-python-pycompile-executable "python2")
  '(flycheck-python-pylint-executable "python2")
+ '(highlight-changes-colors '("#FD5FF0" "#AE81FF"))
+ '(highlight-tail-colors
+   '(("#3C3D37" . 0)
+     ("#679A01" . 20)
+     ("#4BBEAE" . 30)
+     ("#1DB4D0" . 50)
+     ("#9A8F21" . 60)
+     ("#A75B00" . 70)
+     ("#F309DF" . 85)
+     ("#3C3D37" . 100)))
+ '(magit-diff-use-overlays nil)
  '(org-agenda-files
-   '("~/RoamNotes/20220628110903-hcu_web.org" "/home/tiagof/RoamNotes/agenda.org"))
+   '("~/RoamNotes/agenda/2023/2023-04-10~2023-04-14.org" "/home/tiagof/RoamNotes/agenda/2023/2023-04-03~2023-04-07.org" "/home/tiagof/RoamNotes/agenda/2023/2023-03-27~2023-03-31.org" "/home/tiagof/RoamNotes/agenda/2023/2023-01-02~2023-01-06.org" "/home/tiagof/RoamNotes/agenda/2023/2023-01-09~2023-01-13.org" "/home/tiagof/RoamNotes/agenda/2023/2023-01-23~2023-01-27.org" "/home/tiagof/RoamNotes/agenda/2023/2023-01-30~2023-02-03.org" "/home/tiagof/RoamNotes/agenda/2023/2023-02-06~2023-02-10.org" "/home/tiagof/RoamNotes/agenda/2023/2023-02-13~2023-02-17.org" "/home/tiagof/RoamNotes/agenda/2023/2023-02-20~2023-02-24.org" "/home/tiagof/RoamNotes/agenda/2023/2023-03-06~2023-03-10.org" "/home/tiagof/RoamNotes/agenda/2023/2023-03-13~2023-03-17.org" "/home/tiagof/RoamNotes/agenda/2023/2023-03-20~2023-03-25.org"))
+ '(org-export-backends '(ascii html icalendar latex md odt confluence))
  '(package-selected-packages
-   '(magit vterm dracula-theme org dumb-jump rainbow-delimiters org-bullets all-the-icons neotree auto-complete which-key try use-package)))
+   '(htmlize restclient language-detection ox-jira request f org-roam-ui magit vterm dracula-theme org dumb-jump rainbow-delimiters org-bullets all-the-icons neotree auto-complete which-key try use-package))
+ '(pos-tip-background-color "#FFFACE")
+ '(pos-tip-foreground-color "#272822")
+ '(python-shell-interpreter "/grid/common/pkgs/python/v3.7.2/bin/python3.7")
+ '(vc-annotate-background nil)
+ '(vc-annotate-color-map
+   '((20 . "#F92672")
+     (40 . "#CF4F1F")
+     (60 . "#C26C0F")
+     (80 . "#E6DB74")
+     (100 . "#AB8C00")
+     (120 . "#A18F00")
+     (140 . "#989200")
+     (160 . "#8E9500")
+     (180 . "#A6E22E")
+     (200 . "#729A1E")
+     (220 . "#609C3C")
+     (240 . "#4E9D5B")
+     (260 . "#3C9F79")
+     (280 . "#A1EFE4")
+     (300 . "#299BA6")
+     (320 . "#2896B5")
+     (340 . "#2790C3")
+     (360 . "#66D9EF")))
+ '(vc-annotate-very-old-color nil)
+ '(weechat-color-list
+   '(unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0")))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
